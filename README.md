@@ -4,13 +4,9 @@
 
 * Browse and install pallets from the Substrate Marketplace.
 
-* Will install substrate-deps if not already installed
+* Will install [substrate-deps](https://github.com/paritytech/substrate-deps) if not already installed
 
 * Runtime manifest location is hardcoded when run inside Substrate Playground
-
-## Requirements
-
-This extension requires having [substrate-deps](https://github.com/paritytech/substrate-deps) installed.
 
 ## Usage
 
