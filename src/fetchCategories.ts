@@ -7,10 +7,11 @@ const map = require('lodash/fp/map');
 const remove = require('lodash/fp/remove');
 
 import { Category, Pallet } from './types';
+import { GRAPHQL_API_ENDPOINT } from './constants';
 
 const gq = (query: string) => (variables?: object): Promise<any> =>
   fetch(
-    'https://marketplace-api-staging.substrate.dev/graphql',
+    GRAPHQL_API_ENDPOINT,
     {
       method: 'POST',
       headers: {
@@ -22,9 +23,11 @@ const gq = (query: string) => (variables?: object): Promise<any> =>
         variables
       })
     }
-  ).then(invoke('json')).then((d: any) => d.errors ? Promise.reject(map('message')(d.errors)) : d.data);
+  )
+  .then(invoke('json'))
+  .then((d: any) => d.data || Promise.reject(map('message')(d.errors)));
 
-const fetchCategoryDetails = (category: string): Promise<Category> =>
+const fetchPallets = (category: string): Promise<Pallet[]> =>
   gq(`query($category: String!){
 			search(type: PALLET query: "" category: $category) {
 				results {
@@ -42,10 +45,12 @@ const fetchCategoryDetails = (category: string): Promise<Category> =>
 				}
 			}
 		}`)({ category })
-    .then(flow(
-      get('search.results'),
-      ((pallets: Pallet[]) => ({ category, pallets })),
-    ));
+  .then(
+    get('search.results'),
+   );
+
+const fetchCategory = (category: string): Promise<Category> =>
+      fetchPallets(category).then((pallets: Pallet[]) => ({ category, pallets }))
 
 const fetchCategories = (): Promise<Category[]> =>
   gq('{ marketplaceCategories(type:PALLET) {name} }')()
@@ -53,7 +58,7 @@ const fetchCategories = (): Promise<Category[]> =>
       get('marketplaceCategories'),
       map('name'),
       remove(isEqual('tutorial')),
-      map(fetchCategoryDetails),
+      map(fetchCategory),
       Promise.all.bind(Promise)
     ));
 
