@@ -2,7 +2,9 @@
 	"name": "substrate-marketplace",
 	"displayName": "Substrate Marketplace",
 	"description": "Browse and install pallets from the Substrate Marketplace",
-	"version": "0.0.1",
+	"version": "0.1.0",
+	"publisher": "axelchalon",
+	"repository": "github:axelchalon/vscode-marketplace",
 	"engines": {
 		"vscode": "^1.42.0"
 	},
