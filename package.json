@@ -19,6 +19,18 @@
 	],
 	"main": "./out/extension.js",
 	"contributes": {
+		"configuration":[
+			{
+				"title": "Substrate Marketplace",
+				"properties": {
+					"substrateMarketplace.runtimeManifestPath": {
+						"type": ["string", null],
+						"default": null,
+						"description": "Specifies the path to your project's runtime manifest (Cargo.toml) used when installing pallets. It can be either an absolute path or a path relative to the workspace root. If not specified, will try `runtime/Cargo.toml` and `Cargo.toml`."
+					}
+				}
+			}
+		],
 		"views": {
 			"explorer": [
 				{

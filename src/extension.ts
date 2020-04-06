@@ -1,11 +1,10 @@
 import * as vscode from 'vscode';
-const os = require('os');
 
 import { Category } from './types';
+import { getManifestPath } from './getManifestPath';
+import { substrateDepsInstalled } from './substrateDeps';
 import { TreeDataProvider, TreePallet } from './TreeDataProvider';
 import fetchCategories from './fetchCategories';
-import { PLAYGROUND_RUNTIME_MANIFEST_LOCATION } from './constants';
-import { substrateDepsInstalled } from './substrateDeps';
 
 function init(context: vscode.ExtensionContext) {
 	fetchCategories().then((categories: Category[]) => {
@@ -30,54 +29,50 @@ function init(context: vscode.ExtensionContext) {
 
 		// Action for installing the pallet
 		vscode.commands.registerCommand("substrateMarketplace.installPallet", async (item: vscode.TreeItem) => {
+			// Install substrate-deps if needed
 			if (!await substrateDepsInstalled()) {
 				return;
 			}
 
+			// Verify pallet name to prevent shell injection & derive alias
 			const palletName = item.label as string;
 			if (!/^[a-z-]+$/.test(palletName)) {
 				vscode.window.showErrorMessage('Pallet name is invalid.');
 				return;
 			}
+			const alias = (alias => alias === palletName ? null : alias)(palletName.replace(/^pallet-/, ''));
 
+			// Ask for user confirmation
 			const clicked = await vscode.window.showInformationMessage(`Install the pallet ${palletName}?`, { modal: true }, 'Yes');
 			if (clicked !== 'Yes') {
 				return;
 			}
 
-			// Prepare command arguments
-			const alias = (alias => alias === palletName ? null : alias)(palletName.replace(/^pallet-/, ''));
-			const isTheia = os.hostname().startsWith('theia-substrate-');
-			const manifestPath = await (async isTheia =>
-				isTheia
-					? PLAYGROUND_RUNTIME_MANIFEST_LOCATION
-					: (await vscode.window.showOpenDialog({
-						filters: {
-							'Cargo.toml': ['toml']
-						}, openLabel: 'Select location of runtime manifest'
-					}))?.[0]?.path
-			)(isTheia);
-			if (manifestPath === undefined) { return; } // User clicked cancel
-			if (!manifestPath.toString().endsWith('Cargo.toml')) {
-				vscode.window.showErrorMessage('Runtime manifest is invalid, must be Cargo.toml.');
+			// Get manifest path
+			let manifestPath: string;
+			try {
+				manifestPath = await getManifestPath();
+			} catch (e) {
 				return;
 			}
 
-			// Build command
-			const command = [];
-			command.push('substrate-deps');
-			command.push(`add ${palletName}`);
-			if (alias) { command.push(`--alias ${alias}`); };
-			command.push(`--manifest-path ${manifestPath}`);
-			command.push('&& exit');
-			const termCommand = command.join(' ');
+			// Prepare command
+			const termCommand = [
+				'substrate-deps',
+				`add ${palletName}`,
+				...alias ? [`--alias ${alias}`] : [],
+				`--manifest-path '${manifestPath.replace(/'/, `'\\''`)}'`, // Allow spaces in path, prevent command injection
+				'&& exit'
+			].join(' ');
 
 			// Create terminal and run command
 			const term = vscode.window.createTerminal({ name: `Installing ${palletName}` });
 			term.sendText(termCommand);
 
+			// Manage outcome
+
 			const revealTerminalTimeout = setTimeout(() => {
-				vscode.window.showErrorMessage(`An error might have occurred when installing ${palletName}. Please check the terminal for more information.`);
+				vscode.window.showErrorMessage(`An error might have occurred when installing ${palletName} using project runtime manifest ${manifestPath}. Please check the terminal for more information.`);
 				term.show();
 				disp.dispose();
 			}, 5000); // TODO find a better way (IPC?)
@@ -102,6 +97,10 @@ function init(context: vscode.ExtensionContext) {
 }
 
 export function activate(context: vscode.ExtensionContext) {
+	// Set the workspace root as working directory for fs.existsSync;
+	// this lets us use relative paths (e.g. `./runtime/Cargo.toml`) in
+	// the substrateMarketplace.manifestRuntimePath setting
+	(p => p && process.chdir(p))(vscode.workspace.rootPath)
 	init(context);
 }
 
