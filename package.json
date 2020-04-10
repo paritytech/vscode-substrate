@@ -19,18 +19,6 @@
 	],
 	"main": "./out/extension.js",
 	"contributes": {
-		"configuration":[
-			{
-				"title": "Substrate Marketplace",
-				"properties": {
-					"substrateMarketplace.runtimeManifestPath": {
-						"type": ["string", null],
-						"default": null,
-						"description": "Specifies the path to your project's runtime manifest (Cargo.toml) used when installing pallets. It can be either an absolute path or a path relative to the workspace root. If not specified, will try `runtime/Cargo.toml` and `Cargo.toml`."
-					}
-				}
-			}
-		],
 		"views": {
 			"explorer": [
 				{
@@ -43,51 +31,39 @@
 			{
 				"command": "substrateMarketplace.palletHomepage",
 				"title": "Homepage",
-				"icon": {
-					"light": "resources/light/homepage.svg",
-					"dark": "resources/dark/homepage.svg"
-				}
-			},
-			{
-				"command": "substrateMarketplace.palletDocumentation",
-				"title": "Documentation",
-				"icon": {
-					"light": "resources/light/documentation.svg",
-					"dark": "resources/dark/documentation.svg"
-				}
+				"icon": "$(home)"
 			},
 			{
 				"command": "substrateMarketplace.palletGithub",
 				"title": "GitHub",
-				"icon": {
-					"light": "resources/light/github.svg",
-					"dark": "resources/dark/github.svg"
-				}
+				"icon": "$(github)"
+			},
+			{
+				"command": "substrateMarketplace.palletDocumentation",
+				"title": "Documentation",
+				"icon": "$(book)"
 			},
 			{
 				"command": "substrateMarketplace.installPallet",
-				"title": "Install pallet",
-				"icon": {
-					"light": "resources/light/install.svg",
-					"dark": "resources/dark/install.svg"
-				}
+				"title": "Add pallet to runtime",
+				"icon": "$(add)"
 			}
 		],
 		"menus": {
 			"view/item/context": [
 				{
 					"command": "substrateMarketplace.palletHomepage",
-					"when": "view == substrateMarketplace && viewItem == pallet",
+					"when": "view == substrateMarketplace && viewItem == pallet || view == substrateMarketplace && viewItem == palletInstalled",
 					"group": "inline@0"
 				},
 				{
-					"command": "substrateMarketplace.palletDocumentation",
-					"when": "view == substrateMarketplace && viewItem == pallet",
+					"command": "substrateMarketplace.palletGithub",
+					"when": "view == substrateMarketplace && viewItem == pallet || view == substrateMarketplace && viewItem == palletInstalled",
 					"group": "inline@1"
 				},
 				{
-					"command": "substrateMarketplace.palletGithub",
-					"when": "view == substrateMarketplace && viewItem == pallet",
+					"command": "substrateMarketplace.palletDocumentation",
+					"when": "view == substrateMarketplace && viewItem == pallet || view == substrateMarketplace && viewItem == palletInstalled",
 					"group": "inline@2"
 				},
 				{
@@ -106,13 +82,16 @@
 	"devDependencies": {
 		"@types/node": "^10.12.21",
 		"@types/vscode": "^1.42.0",
-		"typescript": "^3.5.1",
-		"tslint": "^5.12.1"
+		"tslint": "^5.12.1",
+		"typescript": "^3.5.1"
 	},
 	"dependencies": {
 		"@types/lodash": "^4.14.149",
 		"@types/node-fetch": "^2.5.5",
+		"glob": "^7.1.6",
 		"lodash": "^4.17.15",
-		"node-fetch": "^2.6.0"
+		"node-fetch": "^2.6.0",
+		"rxjs": "^6.5.5",
+		"string.prototype.matchall": "^4.0.2"
 	}
 }

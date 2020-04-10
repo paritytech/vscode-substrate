@@ -1,16 +1,8 @@
-# Substrate Marketplace VSCode extension
+# Substrate Marketplace - VSCode extension
 
-## Features
+Browse and install pallets from the Substrate Marketplace.
 
-* Browse and install pallets from the Substrate Marketplace.
-
-* Will install [substrate-deps](https://github.com/paritytech/substrate-deps) if not already installed
-
-* Runtime manifest location is hardcoded when run inside Substrate Playground
-
-## Usage
-
-Pallets are listed in the explorer view in the activity bar to the left. Click the "Download" icon to add a pallet to your project.
+![Screenshot](./screenshot.png)
 
 ## Installation
 

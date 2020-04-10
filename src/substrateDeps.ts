@@ -4,6 +4,12 @@ import * as vscode from 'vscode';
 
 import { resolveWhenTerminalClosed } from './util';
 
+/**
+ * Ensures that substrate-deps is installed; installs it otherwise.
+ *
+ * @return A promise that always resolves; either with true in case substrate-deps
+ * is or got installed; false otherwise.
+ */
 export async function substrateDepsInstalled(): Promise<boolean> {
   try {
     child_process.execSync('substrate-deps --version');

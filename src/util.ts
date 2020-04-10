@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { Observable } from 'rxjs';
 
 export function resolveWhenTerminalClosed(term: vscode.Terminal): Promise<undefined> {
   return new Promise((resolve, reject) => {
@@ -8,5 +9,11 @@ export function resolveWhenTerminalClosed(term: vscode.Terminal): Promise<undefi
         resolve();
       }
     });
+  });
+}
+
+export function vscToObservable<T>(fn: (arg0: ((x: T) => any)) => any): Observable<T> {
+  return new Observable<T>((subscriber) => {
+    return fn((x: T) => subscriber.next(x));
   });
 }

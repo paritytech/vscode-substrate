@@ -1,33 +1,27 @@
 import * as vscode from 'vscode';
-const fs = require('fs');
-const os = require('os');
 const path = require('path');
 
-import { PLAYGROUND_RUNTIME_MANIFEST_LOCATION } from './constants';
+import Runtimes from './runtimes/Runtimes';
+import Runtime from './runtimes/Runtime';
 
 /**
- * NOTE
- * Relative paths: node's CWD is set to the workspace root in {@link extension/activate}
+ * Returns a manifest path to operate on.
+ *
+ * @return {Promise<string>}
  */
+export async function getManifestPath(currentRuntimePath: string | null, runtimes: Runtimes) {
+  // If we're already in an active runtime, use it
+  if (currentRuntimePath) return path.join(currentRuntimePath,'Cargo.toml');
 
-export async function getManifestPath() {
-  // Try workspace config
-  const pathFromConfig = vscode.workspace.getConfiguration().get('substrateMarketplace.runtimeManifestPath');
-  if (pathFromConfig) {
-    if (fs.existsSync(pathFromConfig)) {
-      return pathFromConfig;
-    }
-    vscode.window.showErrorMessage(`Runtime manifest path ${pathFromConfig} provided in workspace settings does not exist.`);
+  // Ask the user to pick the runtime to use
+  const allRuntimes: Runtime[] = runtimes.runtimes$.getValue();
+  if (allRuntimes.length > 1) {
+    const pick = await vscode.window.showQuickPick(allRuntimes.map(runtime => runtime.runtimePath).concat("Other"));
+    if (pick === undefined)
+      return Promise.reject();
+    if (pick !== "Other")
+      return path.join(pick, 'Cargo.toml');
   }
-
-  // Try sensible defaults
-  const isTheia = os.hostname().startsWith('theia-substrate-');
-  let existentPath = [
-    path.join(vscode.workspace.rootPath, 'runtime', 'Cargo.toml'),
-    path.join(vscode.workspace.rootPath, 'Cargo.toml'),
-    ...isTheia ? [PLAYGROUND_RUNTIME_MANIFEST_LOCATION] : []
-  ].find(fs.existsSync);
-  if (existentPath) return existentPath;
 
   // Ask the user for location
   const manifestPath = (await vscode.window.showOpenDialog({
@@ -40,13 +34,6 @@ export async function getManifestPath() {
     vscode.window.showErrorMessage('Runtime manifest is invalid, must be Cargo.toml.');
     return Promise.reject();
   }
-
-  // Save user-provided location in workspace settings
-
-  // Favor path relative to workspace root in case the workspace root gets moved
-  // around, or parent folders change names.
-  const relativeManifestPath = path.relative(vscode.workspace.rootPath, manifestPath).toString();
-  vscode.workspace.getConfiguration().update('substrateMarketplace.runtimeManifestPath', relativeManifestPath, vscode.ConfigurationTarget.Workspace);
 
   return manifestPath;
 }
