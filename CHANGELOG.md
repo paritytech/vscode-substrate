@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.2.0
+
+* Support multiple runtimes in the same workspace. Your active editor will determine the runtime used by the extension.
+* Display installed pallets.
+* Removed setting `substrateMarketplace.runtimeManifestPath` & removed Substrate Playground hardcoded path. Runtimes are now detected and updated automatically.
+
 ## v0.1.1
 
 * Your project's runtime manifest location can now be provided using the `substrateMarketplace.runtimeManifestPath` setting.
