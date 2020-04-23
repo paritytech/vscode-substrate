@@ -50,6 +50,24 @@
 			}
 		],
 		"menus": {
+			"commandPalette": [
+				{
+					"command": "substrateMarketplace.palletHomepage",
+					"when": "false"
+				},
+				{
+					"command": "substrateMarketplace.palletGithub",
+					"when": "false"
+				},
+				{
+					"command": "substrateMarketplace.palletDocumentation",
+					"when": "false"
+				},
+				{
+					"command": "substrateMarketplace.installPallet",
+					"when": "false"
+				}
+			],
 			"view/item/context": [
 				{
 					"command": "substrateMarketplace.palletHomepage",
