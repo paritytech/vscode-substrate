@@ -19,15 +19,33 @@
 	],
 	"main": "./out/extension.js",
 	"contributes": {
+		"viewsContainers": {
+			"activitybar": [
+				{
+					"id": "substrate",
+					"title": "Substrate",
+					"icon": "resources/substrate.svg"
+				}
+			]
+		},
 		"views": {
-			"explorer": [
+			"substrate": [
+				{
+					"id": "substrateCommands",
+					"name": "Node"
+				},
 				{
 					"id": "substrateMarketplace",
-					"name": "Substrate Marketplace"
+					"name": "Marketplace"
 				}
 			]
 		},
 		"commands": [
+			{
+				"command": "substrateCommands.runCommand",
+				"title": "Run",
+				"icon": "$(play)"
+			},
 			{
 				"command": "substrateMarketplace.palletHomepage",
 				"title": "Homepage",
@@ -69,6 +87,11 @@
 				}
 			],
 			"view/item/context": [
+				{
+					"command": "substrateCommands.runCommand",
+					"when": "view == substrateCommands && viewItem == command",
+					"group": "inline@0"
+				},
 				{
 					"command": "substrateMarketplace.palletHomepage",
 					"when": "view == substrateMarketplace && viewItem == pallet || view == substrateMarketplace && viewItem == palletInstalled",

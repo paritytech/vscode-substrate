@@ -16,7 +16,7 @@ export async function getManifestPath(currentRuntimePath: string | null, runtime
   // Ask the user to pick the runtime to use
   const allRuntimes: Runtime[] = runtimes.runtimes$.getValue();
   if (allRuntimes.length > 1) {
-    const pick = await vscode.window.showQuickPick(allRuntimes.map(runtime => runtime.runtimePath).concat("Other"));
+    const pick = await vscode.window.showQuickPick(allRuntimes.map(runtime => runtime.runtimePath).concat("Other"), {placeHolder: "Please select the runtime to operate on."});
     if (pick === undefined)
       return Promise.reject();
     if (pick !== "Other")

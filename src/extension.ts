@@ -7,6 +7,11 @@ import { TreeDataProvider, TreePallet } from './TreeDataProvider';
 import fetchCategories from './fetchCategories';
 import Runtimes from './runtimes/Runtimes';
 import CurrentRuntime from './runtimes/CurrentRuntime';
+import { CommandsProvider } from './commands/CommandsProvider';
+
+const glob = require('glob');
+const fs = require('fs');
+const path = require('path');
 
 export function activate(context: vscode.ExtensionContext) {
 	init(context);
@@ -14,11 +19,67 @@ export function activate(context: vscode.ExtensionContext) {
 
 export function deactivate() { }
 
+/**
+ * Given a folder path, return a list of substrate node templates contained inside.
+ */
+const findNodeTemplatesInFolder = (roots: string): string[] => {
+	console.log('finding nodes in',roots);
+	// TODO use vscode.workspace.findFiles instead
+	return glob.sync(path.join(roots, '**/Cargo.toml'), { ignore: '**/node_modules/**' }).filter((b: string) => {
+		return fs.readFileSync(b).toString().includes('[workspace]')
+	}).map((nodeRs: string) => path.dirname(nodeRs)); // (todo transducers)
+}
+
+async function getNodeTemplatePath() {
+	const nodes = vscode.workspace.workspaceFolders?.map((x) => x.uri.fsPath).map(root => {
+		return findNodeTemplatesInFolder(root);
+	}).flat() || [];
+
+	if (nodes.length === 1)
+		return nodes[0];
+
+	if (nodes.length === 0) {
+		vscode.window.showErrorMessage('substrate-node-template was not found in the workspace.');
+		return Promise.reject();
+	}
+
+	const pick = await vscode.window.showQuickPick(nodes, {placeHolder: "Please choose a workspace."});
+	if (pick === undefined)
+		return Promise.reject();
+
+	return pick;
+}
+
 function init(context: vscode.ExtensionContext) {
 	fetchCategories().then((categories: Category[]) => {
 		// TODO make this a class. Makes it easier to have common access to common
 		// dependencies (runtimes; currentRuntime), and automatically breaks down
 		// the code into functions.
+
+		// Set up commands
+		vscode.window.createTreeView('substrateCommands', {treeDataProvider: new CommandsProvider()});
+		vscode.commands.registerCommand("substrateCommands.runCommand", async (item: vscode.TreeItem & {name: string}) => {
+			// todo use item.command instead
+			if (item.name === 'Compile node') {
+				const term = vscode.window.createTerminal({name: 'Compile node', cwd: await getNodeTemplatePath()});
+				term.sendText('cargo build --release');
+				term.show();
+			} else if (item.name === 'Start node') {
+				const term = vscode.window.createTerminal({ name: 'Start node', cwd: await getNodeTemplatePath() });
+				term.sendText('./target/release/node-template --dev --ws-external');
+				term.show();
+			} else if (item.name === 'Purge chain') {
+				const term = vscode.window.createTerminal({ name: 'Purge chain', cwd: await getNodeTemplatePath() });
+				term.sendText('./target/release/node-template purge-chain --dev');
+				term.show();
+			} else if (item.name === 'Polkadot Apps') {
+				// todo retrieve nodeWebsocket from env or info file (cargo.toml or .vscode)
+				// const polkadotAppsURL = `https://polkadot.js.org/apps/?rpc=${nodeWebsocket}`;
+				// vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(polkadotAppsURL));
+			} else if (item.name === 'Send feedback') {
+				vscode.commands.executeCommand('vscode.open', vscode.Uri.parse('https://docs.google.com/forms/d/e/1FAIpQLSdXpq_fHqS_ow4nC7EpGmrC_XGX_JCIRzAqB1vaBtoZrDW-ZQ/viewform?edit_requested=true'));
+			}
+		});
 
 		// Set up tree view
 		const runtimes = new Runtimes();
