@@ -60,7 +60,9 @@ function init(context: vscode.ExtensionContext) {
 		vscode.window.createTreeView('substrateCommands', {treeDataProvider: new CommandsProvider()});
 		vscode.commands.registerCommand("substrateCommands.runCommand", async (item: vscode.TreeItem & {name: string}) => {
 			// todo use item.command instead
-			if (item.name === 'Compile node') {
+			if (item.name === 'Getting started') { // Theia-specific
+				// run TheiaSubstrateExtension.getting.started.widget
+			} else if (item.name === 'Compile node') {
 				const term = vscode.window.createTerminal({name: 'Compile node', cwd: await getNodeTemplatePath()});
 				term.sendText('cargo build --release');
 				term.show();
@@ -72,13 +74,42 @@ function init(context: vscode.ExtensionContext) {
 				const term = vscode.window.createTerminal({ name: 'Purge chain', cwd: await getNodeTemplatePath() });
 				term.sendText('./target/release/node-template purge-chain --dev');
 				term.show();
-			} else if (item.name === 'Polkadot Apps') {
+			} else if (item.name === 'Polkadot Apps') { // Theia-specific
 				// todo retrieve nodeWebsocket from env or info file (cargo.toml or .vscode)
 				// const polkadotAppsURL = `https://polkadot.js.org/apps/?rpc=${nodeWebsocket}`;
 				// vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(polkadotAppsURL));
-			} else if (item.name === 'Send feedback') {
-				vscode.commands.executeCommand('vscode.open', vscode.Uri.parse('https://docs.google.com/forms/d/e/1FAIpQLSdXpq_fHqS_ow4nC7EpGmrC_XGX_JCIRzAqB1vaBtoZrDW-ZQ/viewform?edit_requested=true'));
-			}
+			} else if (item.name === 'Start front-end') { // Theia-specific
+				// todo retrieve nodeWebsocket from env or info file (cargo.toml or .vscode)
+				// const port = 8000;
+				// const term = vscode.window.createTerminal({ name: 'Start front-end', cwd: '/home/workspace/substrate-front-end-template' });
+				// term.sendText(`REACT_APP_PROVIDER_SOCKET=${nodeWebsocket} yarn build && rm -rf front-end/ && mv build front-end && python -m SimpleHTTPServer ${port}\r`);
+				// term.show();
+			} else if (item.name === 'Open front-end') { // Theia-specific
+				// todo retrieve hostname from theia
+				// todo retrieve port (8000) from theia
+				// const frontendURL = localhost ? `//${hostname}:${port}` : `//${hostname}/front-end`;
+				// vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(frontendURL));
+			} else if (item.name === 'Take the tour') { // Theia-specific
+				var theiaSubstrateExtension = vscode.extensions.getExtension('TheiaSubstrateExtension'); // todo should be publisher.fullName but TheiaSubstrateExtension doesn't have a publisher
+
+				if (theiaSubstrateExtension?.isActive == false) {
+					theiaSubstrateExtension.activate().then(
+						function () {
+							console.log("TheiaSubstrateExtension activated");
+							vscode.commands.executeCommand("TheiaSubstrateExtension.tour-command");
+						},
+						function () {
+							console.log("Activation of TheiaSubstrateExtension failed");
+						}
+					);
+				} else {
+					vscode.commands.executeCommand("TheiaSubstrateExtension.tour-command");
+				}
+			} else if (item.name === 'Download archive') { // Theia-specific
+				// run TheiaSubstrateExtension.download-archive
+			} else if (item.name === 'Send feedback') { // Theia-specific
+						vscode.commands.executeCommand('vscode.open', vscode.Uri.parse('https://docs.google.com/forms/d/e/1FAIpQLSdXpq_fHqS_ow4nC7EpGmrC_XGX_JCIRzAqB1vaBtoZrDW-ZQ/viewform?edit_requested=true'));
+				}
 		});
 
 		// Set up tree view

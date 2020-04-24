@@ -1,23 +1,37 @@
 import * as vscode from 'vscode';
 
+const os = require('os');
+
 export class CommandsProvider implements vscode.TreeDataProvider<vscode.TreeItem> {
   items: vscode.TreeItem[];
 
   constructor() {
-    const commands = [
-      {name: 'Getting started'},
-      {name: ''},
+
+    const isTheia = os.hostname().startsWith('theia-substrate-');
+
+    let commands = [];
+    if (isTheia) {
+      commands = [
+        { name: 'Getting started' },
+        { name: '' },
+        { name: 'Compile node' },
+        { name: 'Start node' },
+        { name: 'Purge chain' },
+        { name: 'Polkadot apps' },
+        { name: 'Start front-end' },
+        { name: 'Open front-end' },
+        { name: 'Take the tour' },
+        { name: '' },
+        { name: 'Download archive' },
+        { name: 'Send feedback' },
+      ];
+    } else {
+      commands = [
       {name: 'Compile node'},
       {name: 'Start node'},
-      {name: 'Purge chain'},
-      {name: 'Polkadot apps'}, // only in theia
-      {name: 'Start front-end'}, // only in theia
-      {name: 'Open front-end'}, // only in theia
-      {name: 'Take the tour'}, // only in theia
-      {name: ''}, // only in theia
-      {name: 'Download archive'}, // only in theia
-      {name: 'Send feedback'}, // only in theia
-    ];
+      {name: 'Purge chain'}
+      ];
+    }
 
     this.items = commands.map((category: any) => {
       return new Item(category);
