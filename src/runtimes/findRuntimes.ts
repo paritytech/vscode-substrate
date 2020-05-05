@@ -1,6 +1,7 @@
 const fs = require('fs');
 const glob = require('glob');
 const path = require('path');
+import 'array-flat-polyfill';
 
 /**
  * Given a folder path, return a list of runtimes contained inside.

@@ -8,6 +8,7 @@ import fetchCategories from './fetchCategories';
 import Runtimes from './runtimes/Runtimes';
 import CurrentRuntime from './runtimes/CurrentRuntime';
 import { CommandsProvider } from './commands/CommandsProvider';
+import 'array-flat-polyfill';
 
 const glob = require('glob');
 const fs = require('fs');
@@ -60,6 +61,7 @@ function init(context: vscode.ExtensionContext) {
 		vscode.window.createTreeView('substrateCommands', {treeDataProvider: new CommandsProvider()});
 		vscode.commands.registerCommand("substrateCommands.runCommand", async (item: vscode.TreeItem & {name: string}) => {
 			// todo use item.command instead
+			// todo use a mapping instead
 			if (item.name === 'Getting started') { // Theia-specific
 				// run TheiaSubstrateExtension.getting.started.widget
 			} else if (item.name === 'Compile node') {
@@ -176,36 +178,39 @@ function init(context: vscode.ExtensionContext) {
 				`add ${palletName}`,
 				...alias ? [`--alias ${alias}`] : [],
 				`--manifest-path '${manifestPath.replace(/'/, `'\\''`)}'`, // Allow spaces in path, prevent command injection (TODO Windows?)
-				'&& exit'
+				`&& echo '${palletName} was successfully added to the project${alias ? ` as '${ alias }'` : ''}.'`
 			].join(' ');
 
 			// Create terminal and run command
 			const term = vscode.window.createTerminal({ name: `Installing ${palletName}` });
 			term.sendText(termCommand);
+			term.show();
 
 			// Manage outcome
+
+			// -- TODO -- Theia doesn't support getting the exit code of the terminal
 
 			// We currently assume that if the command takes more than a certain time
 			// to complete, it probably failed. We then show the hidden terminal to
 			// the user. We should find a better way to check if the command error'ed.
 			// (IPC?) TODO
-			const revealTerminalTimeout = setTimeout(() => {
-				vscode.window.showErrorMessage(`An error might have occurred when installing ${palletName} using project runtime manifest ${manifestPath}. Please check the terminal for more information.`);
-				term.show();
-				disp.dispose();
-			}, 5000);
+			// const revealTerminalTimeout = setTimeout(() => {
+			// 	vscode.window.showErrorMessage(`An error might have occurred when installing ${palletName} using project runtime manifest ${manifestPath}. Please check the terminal for more information.`);
+			// 	term.show();
+			// 	disp.dispose();
+			// }, 5000);
 
 			// TODO Reuse resolveWhenTerminalClosed
 			// TODO In case of multiple runtimes, indicate the runtime it was installed on.
-			const disp = vscode.window.onDidCloseTerminal(t => {
-				if (t === term) {
-					disp.dispose();
-					if (t?.exitStatus?.code === 0) {
-						vscode.window.showInformationMessage(`${palletName} was successfully added to the project${alias ? ` as '${alias}'` : ''}.`);
-						clearTimeout(revealTerminalTimeout);
-					}
-				}
-			});
+			// const disp = vscode.window.onDidCloseTerminal(t => {
+			// 	if (t === term) {
+			// 		disp.dispose();
+			// 		if (t?.exitStatus?.code === 0) {
+			// 			vscode.window.showInformationMessage(`${palletName} was successfully added to the project${alias ? ` as '${alias}'` : ''}.`);
+			// 			clearTimeout(revealTerminalTimeout);
+			// 		}
+			// 	}
+			// });
 
 		});
 	}, (async r => { // Offer to retry in case fetching the categories failed
