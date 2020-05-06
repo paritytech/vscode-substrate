@@ -35,6 +35,10 @@
 					"name": "Node"
 				},
 				{
+					"id": "substrateRuntimes",
+					"name": "Runtimes"
+				},
+				{
 					"id": "substrateMarketplace",
 					"name": "Marketplace"
 				}

@@ -7,7 +7,8 @@ import { TreeDataProvider, TreePallet } from './TreeDataProvider';
 import fetchCategories from './fetchCategories';
 import Runtimes from './runtimes/Runtimes';
 import CurrentRuntime from './runtimes/CurrentRuntime';
-import { CommandsProvider } from './commands/CommandsProvider';
+import { CommandsProvider } from './commandsTreeView/CommandsProvider';
+import { RuntimesProvider } from './runtimesTreeView/RuntimesProvider';
 import 'array-flat-polyfill';
 
 const glob = require('glob');
@@ -124,6 +125,9 @@ function init(context: vscode.ExtensionContext) {
 			else
 				treeView.message = ``;
 		});
+
+		// Set up runtimes
+		vscode.window.createTreeView('substrateRuntimes', { treeDataProvider: new RuntimesProvider(runtimes) });
 
 		// Set up commands: documentation, github, homepage
 		([
