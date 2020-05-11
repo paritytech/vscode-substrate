@@ -31,16 +31,19 @@
 		"views": {
 			"substrate": [
 				{
-					"id": "substrateCommands",
-					"name": "Node"
+					"id": "substrateRuntimes",
+					"name": "Runtimes",
+					"group": "@0"
 				},
 				{
-					"id": "substrateRuntimes",
-					"name": "Runtimes"
+					"id": "substrateCommands",
+					"name": "Node",
+					"group": "@1"
 				},
 				{
 					"id": "substrateMarketplace",
-					"name": "Marketplace"
+					"name": "Marketplace",
+					"group": "@2"
 				}
 			]
 		},

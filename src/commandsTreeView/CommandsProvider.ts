@@ -7,7 +7,7 @@ export class CommandsProvider implements vscode.TreeDataProvider<vscode.TreeItem
 
   constructor() {
 
-    const isTheia = os.hostname().startsWith('theia-substrate-');
+    const isTheia = os.hostname().startsWith('theia-substrate-') || true; // temp
 
     let commands = [];
     if (isTheia) {
@@ -17,7 +17,7 @@ export class CommandsProvider implements vscode.TreeDataProvider<vscode.TreeItem
         { name: 'Compile node' },
         { name: 'Start node' },
         { name: 'Purge chain' },
-        { name: 'Polkadot apps' },
+        { name: 'Polkadot Apps' },
         { name: 'Start front-end' },
         { name: 'Open front-end' },
         { name: 'Take the tour' },

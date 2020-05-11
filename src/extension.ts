@@ -58,12 +58,27 @@ function init(context: vscode.ExtensionContext) {
 		// dependencies (runtimes; currentRuntime), and automatically breaks down
 		// the code into functions.
 
+		const runtimes = new Runtimes();
+		const currentRuntime = new CurrentRuntime(runtimes);
+
+		// Set up runtimes
+		vscode.window.createTreeView('substrateRuntimes', { treeDataProvider: new RuntimesProvider(runtimes) });
+
 		// Set up commands
 		vscode.window.createTreeView('substrateCommands', {treeDataProvider: new CommandsProvider()});
 		vscode.commands.registerCommand("substrateCommands.runCommand", async (item: vscode.TreeItem & {name: string}) => {
 			// todo use item.command instead
 			// todo use a mapping instead
 			if (item.name === 'Getting started') { // Theia-specific
+				try {
+				vscode.commands.executeCommand("getting.started.widget");
+			} catch(e) {console.log('fail1',e); }
+			try {
+			vscode.commands.executeCommand("TheiaSubstrateExtension.getting-started-widget-command");
+			} catch (e) { console.log('fail2', e);}
+				try {
+					vscode.commands.executeCommand("TheiaSubstrateExtension.getting-started-widget");
+				} catch (e) { console.log('fail3', e); }
 				// run TheiaSubstrateExtension.getting.started.widget
 			} else if (item.name === 'Compile node') {
 				const term = vscode.window.createTerminal({name: 'Compile node', cwd: await getNodeTemplatePath()});
@@ -78,46 +93,31 @@ function init(context: vscode.ExtensionContext) {
 				term.sendText('./target/release/node-template purge-chain --dev');
 				term.show();
 			} else if (item.name === 'Polkadot Apps') { // Theia-specific
-				// todo retrieve nodeWebsocket from env or info file (cargo.toml or .vscode)
-				// const polkadotAppsURL = `https://polkadot.js.org/apps/?rpc=${nodeWebsocket}`;
-				// vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(polkadotAppsURL));
+				const INSTANCE_UUID = process.env.INSTANCE_UUID;
+				const nodeWebSocket = `wss://${INSTANCE_UUID}.playground.substrate.dev/wss`
+				const polkadotAppsURL = `https://polkadot.js.org/apps/?rpc=${nodeWebSocket}`;
+				vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(polkadotAppsURL));
 			} else if (item.name === 'Start front-end') { // Theia-specific
-				// todo retrieve nodeWebsocket from env or info file (cargo.toml or .vscode)
-				// const port = 8000;
-				// const term = vscode.window.createTerminal({ name: 'Start front-end', cwd: '/home/workspace/substrate-front-end-template' });
-				// term.sendText(`REACT_APP_PROVIDER_SOCKET=${nodeWebsocket} yarn build && rm -rf front-end/ && mv build front-end && python -m SimpleHTTPServer ${port}\r`);
-				// term.show();
+				const INSTANCE_UUID = process.env.INSTANCE_UUID;
+				const nodeWebSocket = `wss://${INSTANCE_UUID}.playground.substrate.dev/wss`
+				const port = 8000;
+				const term = vscode.window.createTerminal({ name: 'Start front-end', cwd: '/home/workspace/substrate-front-end-template' });
+				term.sendText(`REACT_APP_PROVIDER_SOCKET=${nodeWebSocket} yarn build && rm -rf front-end/ && mv build front-end && python -m SimpleHTTPServer ${port}\r`);
+				term.show();
 			} else if (item.name === 'Open front-end') { // Theia-specific
-				// todo retrieve hostname from theia
-				// todo retrieve port (8000) from theia
-				// const frontendURL = localhost ? `//${hostname}:${port}` : `//${hostname}/front-end`;
-				// vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(frontendURL));
+				const INSTANCE_UUID = process.env.INSTANCE_UUID;
+				const frontendURL = `https://${INSTANCE_UUID}.playground.substrate.dev/front-end`;
+				vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(frontendURL));
 			} else if (item.name === 'Take the tour') { // Theia-specific
-				var theiaSubstrateExtension = vscode.extensions.getExtension('TheiaSubstrateExtension'); // todo should be publisher.fullName but TheiaSubstrateExtension doesn't have a publisher
-
-				if (theiaSubstrateExtension?.isActive == false) {
-					theiaSubstrateExtension.activate().then(
-						function () {
-							console.log("TheiaSubstrateExtension activated");
-							vscode.commands.executeCommand("TheiaSubstrateExtension.tour-command");
-						},
-						function () {
-							console.log("Activation of TheiaSubstrateExtension failed");
-						}
-					);
-				} else {
 					vscode.commands.executeCommand("TheiaSubstrateExtension.tour-command");
-				}
 			} else if (item.name === 'Download archive') { // Theia-specific
-				// run TheiaSubstrateExtension.download-archive
+					vscode.commands.executeCommand("TheiaSubstrateExtension.download-archive-command");
 			} else if (item.name === 'Send feedback') { // Theia-specific
-						vscode.commands.executeCommand('vscode.open', vscode.Uri.parse('https://docs.google.com/forms/d/e/1FAIpQLSdXpq_fHqS_ow4nC7EpGmrC_XGX_JCIRzAqB1vaBtoZrDW-ZQ/viewform?edit_requested=true'));
+					vscode.commands.executeCommand('vscode.open', vscode.Uri.parse('https://docs.google.com/forms/d/e/1FAIpQLSdXpq_fHqS_ow4nC7EpGmrC_XGX_JCIRzAqB1vaBtoZrDW-ZQ/viewform?edit_requested=true'));
 				}
 		});
 
 		// Set up tree view
-		const runtimes = new Runtimes();
-		const currentRuntime = new CurrentRuntime(runtimes);
 		const treeView = vscode.window.createTreeView('substrateMarketplace', {treeDataProvider: new TreeDataProvider(categories, currentRuntime)});
 		currentRuntime.changes$.subscribe((change) => {
 			if (change && runtimes.runtimes$.getValue().length > 1)
@@ -125,9 +125,6 @@ function init(context: vscode.ExtensionContext) {
 			else
 				treeView.message = ``;
 		});
-
-		// Set up runtimes
-		vscode.window.createTreeView('substrateRuntimes', { treeDataProvider: new RuntimesProvider(runtimes) });
 
 		// Set up commands: documentation, github, homepage
 		([
