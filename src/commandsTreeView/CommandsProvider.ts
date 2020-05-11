@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 
 const os = require('os');
+const path = require('path');
 
 export class CommandsProvider implements vscode.TreeDataProvider<vscode.TreeItem> {
   items: vscode.TreeItem[];
@@ -65,7 +66,7 @@ class Item extends vscode.TreeItem {
     this.name = name;
     if (name) {
       this.contextValue = 'command';
-      this.iconPath = new vscode.ThemeIcon('gear');
+      this.iconPath = path.join(__filename, '..', '..', '..', 'resources', 'gear.svg');
     } else {
       this.contextValue = 'separator';
       this.description = '—';
