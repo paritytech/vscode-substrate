@@ -62,6 +62,11 @@ export class RuntimeTreeItem extends vscode.TreeItem {
       runtimePath,
       vscode.TreeItemCollapsibleState.None);
     this.name = runtimePath;
+    this.command = {
+      command: "substrateRuntimes.selectRuntime",
+      title: "Select Runtime",
+      arguments: [this]
+    };
     // this.description = description;
     // this.tooltip = `${name} - ${description}`;
     // this.contextValue = 'pallet';

@@ -27,7 +27,7 @@ function isInDir(file: string, dir: string): boolean {
 // TODO Needs some testing on Windows.
 // TODO Actually it's broken in case of ('a/y',['a/x/y']). Should return 'a/y'.
 // Currently a/x/z/y returns x, but what if we have another runtime a/z/x and a/z/z? Should return z/x and z/z for them, respectively. i.e. to compute the output we would need to know the output for the other paths, to an extent. Use an external function instead.
-function getIdentifyingBit(folderPath: string, against: string[]): string {
+export function getIdentifyingBit(folderPath: string, against: string[]): string {
   const systemRoot = path.parse(process.cwd()).root;
 
   // Collect list of absolute paths of every parent folder.

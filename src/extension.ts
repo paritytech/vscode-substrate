@@ -6,10 +6,13 @@ import { substrateDepsInstalled } from './substrateDeps';
 import { TreeDataProvider, TreePallet } from './TreeDataProvider';
 import fetchCategories from './fetchCategories';
 import Runtimes from './runtimes/Runtimes';
-import CurrentRuntime from './runtimes/CurrentRuntime';
+import {getIdentifyingBit} from './runtimes/CurrentRuntime';
 import { CommandsProvider } from './commandsTreeView/CommandsProvider';
 import { RuntimesProvider } from './runtimesTreeView/RuntimesProvider';
 import 'array-flat-polyfill';
+import { Subject, BehaviorSubject, of } from 'rxjs';
+import Runtime from './runtimes/Runtime';
+import { withLatestFrom, switchMap, map, tap } from 'rxjs/operators';
 
 const glob = require('glob');
 const fs = require('fs');
@@ -59,10 +62,36 @@ function init(context: vscode.ExtensionContext) {
 		// the code into functions.
 
 		const runtimes = new Runtimes();
-		const currentRuntime = new CurrentRuntime(runtimes);
+		// const currentRuntime = new CurrentRuntime(runtimes);
+
+		var selectedRuntimePath$ = new BehaviorSubject<string | null>(null);
+		type Change = { runtimePath: string; deps: string[], shortname: string } | null;
+		var selectedRuntimeChanges$ = new BehaviorSubject<Change>(null);
+
+		selectedRuntimePath$.pipe(
+			withLatestFrom(runtimes.runtimes$), // eek todo (&tests to be able to refactor)
+			switchMap(([runtimePath, runtimes]: [string | null, Runtime[]]) => {
+				if (!runtimePath) return of(null);
+				const selectedRuntime = runtimes.find(runtime => runtime.runtimePath === runtimePath);
+				if (selectedRuntime === undefined) {
+					console.error("Selected runtime but doesn't match any.");
+					return of(null);
+				}
+				let shortname = runtimes.length === 1 // TODO this should be handled by getIdentifyingBit (and should exceptionally return the basename and not the oldest parent)
+					? path.basename(path.dirname(runtimePath))
+					: getIdentifyingBit(runtimePath, runtimes.map(r => r.runtimePath).filter(runtimePath => runtimePath != runtimePath));
+				return selectedRuntime.deps$.pipe(map(deps => ({ runtimePath: runtimePath, deps, shortname })));
+			}),
+			tap(r => console.log('Selected runtime \'changes\' fired with', r))
+		).subscribe(selectedRuntimeChanges$);
 
 		// Set up runtimes
 		vscode.window.createTreeView('substrateRuntimes', { treeDataProvider: new RuntimesProvider(runtimes) });
+		vscode.commands.registerCommand("substrateRuntimes.selectRuntime", (item: vscode.TreeItem) => {
+			console.log('select runtime');
+			console.log(item.label);
+			selectedRuntimePath$.next(item.label || null);
+		});
 
 		// Set up commands
 		vscode.window.createTreeView('substrateCommands', {treeDataProvider: new CommandsProvider()});
@@ -118,10 +147,10 @@ function init(context: vscode.ExtensionContext) {
 		});
 
 		// Set up tree view
-		const treeView = vscode.window.createTreeView('substrateMarketplace', {treeDataProvider: new TreeDataProvider(categories, currentRuntime)});
-		currentRuntime.changes$.subscribe((change) => {
+		const treeView = vscode.window.createTreeView('substrateMarketplace', {treeDataProvider: new TreeDataProvider(categories, selectedRuntimeChanges$)});
+		selectedRuntimeChanges$.subscribe((change) => {
 			if (change && runtimes.runtimes$.getValue().length > 1)
-				treeView.message = `Current runtime: ${change.shortname}`;
+				treeView.message = `Selected runtime: ${change.shortname || change.runtimePath}`; // todo
 			else
 				treeView.message = ``;
 		});
@@ -167,8 +196,12 @@ function init(context: vscode.ExtensionContext) {
 			// Get manifest path
 			let manifestPath: string;
 			try {
-				let currentRuntimeChanges = currentRuntime.changes$.getValue();
-				manifestPath = await getManifestPath(currentRuntimeChanges?.runtimePath || null, runtimes);
+				let selectedRuntimeChanges = selectedRuntimeChanges$.getValue();
+				if (!selectedRuntimeChanges) {
+					vscode.window.showErrorMessage('Please first select a runtime.');
+					return;
+				}
+				manifestPath = await getManifestPath(selectedRuntimeChanges?.runtimePath || null, runtimes);
 			} catch (e) {
 				return;
 			}
