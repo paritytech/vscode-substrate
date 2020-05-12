@@ -3,6 +3,8 @@ import {Category, Pallet} from './types';
 import { BehaviorSubject } from 'rxjs';
 import CurrentRuntime from './runtimes/CurrentRuntime';
 
+const path = require('path');
+
 type TreeItem = TreePallet | TreeCategory;
 
 export class TreeDataProvider implements vscode.TreeDataProvider<TreeItem> {
@@ -23,7 +25,7 @@ export class TreeDataProvider implements vscode.TreeDataProvider<TreeItem> {
             treePallet.contextValue = changes && changes.deps.includes(treePallet.name)
               ? 'palletInstalled' // TODO work from a single source of truth and have a clear mapping instead (see above comment); pure functions
               : 'pallet';
-            treePallet.iconPath = treePallet.contextValue === 'palletInstalled' ? new vscode.ThemeIcon('check') : false;
+            treePallet.iconPath = treePallet.contextValue === 'palletInstalled' ? path.join(__filename, '..', '..', 'resources', 'check.svg') : false;
           });
       });
       this._onDidChangeTreeData.fire();
