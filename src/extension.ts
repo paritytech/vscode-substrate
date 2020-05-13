@@ -121,19 +121,19 @@ function init(context: vscode.ExtensionContext) {
 				term.sendText('./target/release/node-template purge-chain --dev');
 				term.show();
 			} else if (item.name === 'Polkadot Apps') { // Theia-specific
-				const INSTANCE_UUID = process.env.INSTANCE_UUID;
+				const INSTANCE_UUID = process.env.SUBSTRATE_PLAYGROUND_INSTANCE;
 				const nodeWebSocket = `wss://${INSTANCE_UUID}.playground.substrate.dev/wss`
 				const polkadotAppsURL = `https://polkadot.js.org/apps/?rpc=${nodeWebSocket}`;
 				vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(polkadotAppsURL));
 			} else if (item.name === 'Start front-end') { // Theia-specific
-				const INSTANCE_UUID = process.env.INSTANCE_UUID;
+				const INSTANCE_UUID = process.env.SUBSTRATE_PLAYGROUND_INSTANCE;
 				const nodeWebSocket = `wss://${INSTANCE_UUID}.playground.substrate.dev/wss`
 				const port = 8000;
 				const term = vscode.window.createTerminal({ name: 'Start front-end', cwd: '/home/workspace/substrate-front-end-template' });
 				term.sendText(`REACT_APP_PROVIDER_SOCKET=${nodeWebSocket} yarn build && rm -rf front-end/ && mv build front-end && python -m SimpleHTTPServer ${port}\r`);
 				term.show();
 			} else if (item.name === 'Open front-end') { // Theia-specific
-				const INSTANCE_UUID = process.env.INSTANCE_UUID;
+				const INSTANCE_UUID = process.env.SUBSTRATE_PLAYGROUND_INSTANCE;
 				const frontendURL = `https://${INSTANCE_UUID}.playground.substrate.dev/front-end`;
 				vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(frontendURL));
 			} else if (item.name === 'Take the tour') { // Theia-specific
