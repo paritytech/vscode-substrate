@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import Runtime from '../runtimes/Runtime';
 import Runtimes from '../runtimes/Runtimes';
+import { tryShortname } from '../extension';
 
 export class RuntimesProvider implements vscode.TreeDataProvider<RuntimeTreeItem> {
   runtimeTreeItems: RuntimeTreeItem[] = [];
@@ -59,7 +60,7 @@ export class RuntimeTreeItem extends vscode.TreeItem {
   constructor(runtime: Runtime) {
     const { runtimePath } = runtime;
     super(
-      runtimePath,
+      tryShortname(runtimePath),
       vscode.TreeItemCollapsibleState.None);
     this.name = runtimePath;
     this.command = {

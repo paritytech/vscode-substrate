@@ -31,8 +31,14 @@ const findNodeTemplatesInFolder = (roots: string): string[] => {
 	console.log('finding nodes in',roots);
 	// TODO use vscode.workspace.findFiles instead
 	return glob.sync(path.join(roots, '**/Cargo.toml'), { ignore: '**/node_modules/**' }).filter((b: string) => {
-		return fs.readFileSync(b).toString().includes('[workspace]')
+		return fs.readFileSync(b).toString().includes('[[bin]]')
 	}).map((nodeRs: string) => path.dirname(nodeRs)); // (todo transducers)
+}
+
+export function tryShortname(fullPath: string) {
+	const workspaceRoot = vscode.workspace.workspaceFolders?.map((x) => x.uri.fsPath)[0];
+	if (!workspaceRoot) return fullPath;
+	return path.relative(workspaceRoot, fullPath);
 }
 
 async function getNodeTemplatePath() {
@@ -44,15 +50,17 @@ async function getNodeTemplatePath() {
 		return nodes[0];
 
 	if (nodes.length === 0) {
-		vscode.window.showErrorMessage('substrate-node-template was not found in the workspace.');
+		vscode.window.showErrorMessage('No node was found in the workspace.');
 		return Promise.reject();
 	}
 
-	const pick = await vscode.window.showQuickPick(nodes, {placeHolder: "Please choose a workspace."});
+	const nodesReadable = nodes.map(n => tryShortname(n));
+
+	const pick = await vscode.window.showQuickPick(nodesReadable, {placeHolder: "Please choose a node."});
 	if (pick === undefined)
 		return Promise.reject();
 
-	return pick;
+	return nodes[nodesReadable.findIndex(x => x === pick)];
 }
 
 function init(context: vscode.ExtensionContext) {
@@ -77,21 +85,12 @@ function init(context: vscode.ExtensionContext) {
 					console.error("Selected runtime but doesn't match any.");
 					return of(null);
 				}
-				let shortname = runtimes.length === 1 // TODO this should be handled by getIdentifyingBit (and should exceptionally return the basename and not the oldest parent)
-					? path.basename(path.dirname(runtimePath))
-					: getIdentifyingBit(runtimePath, runtimes.map(r => r.runtimePath).filter(runtimePath => runtimePath != runtimePath));
+
+				let shortname = tryShortname(runtimePath);
 				return selectedRuntime.deps$.pipe(map(deps => ({ runtimePath: runtimePath, deps, shortname })));
 			}),
 			tap(r => console.log('Selected runtime \'changes\' fired with', r))
 		).subscribe(selectedRuntimeChanges$);
-
-		// Set up runtimes
-		vscode.window.createTreeView('substrateRuntimes', { treeDataProvider: new RuntimesProvider(runtimes) });
-		vscode.commands.registerCommand("substrateRuntimes.selectRuntime", (item: vscode.TreeItem) => {
-			console.log('select runtime');
-			console.log(item.label);
-			selectedRuntimePath$.next(item.label || null);
-		});
 
 		// Set up commands
 		vscode.window.createTreeView('substrateCommands', {treeDataProvider: new CommandsProvider()});
@@ -144,6 +143,12 @@ function init(context: vscode.ExtensionContext) {
 			} else if (item.name === 'Send feedback') { // Theia-specific
 					vscode.commands.executeCommand('vscode.open', vscode.Uri.parse('https://docs.google.com/forms/d/e/1FAIpQLSdXpq_fHqS_ow4nC7EpGmrC_XGX_JCIRzAqB1vaBtoZrDW-ZQ/viewform?edit_requested=true'));
 				}
+		});
+
+		// Set up runtimes
+		vscode.window.createTreeView('substrateRuntimes', { treeDataProvider: new RuntimesProvider(runtimes) });
+		vscode.commands.registerCommand("substrateRuntimes.selectRuntime", (item: vscode.TreeItem) => {
+			selectedRuntimePath$.next((item as any).name || null);
 		});
 
 		// Set up tree view

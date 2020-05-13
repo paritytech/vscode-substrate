@@ -31,13 +31,13 @@
 		"views": {
 			"substrate": [
 				{
-					"id": "substrateRuntimes",
-					"name": "Runtimes",
+					"id": "substrateCommands",
+					"name": "Node operations",
 					"group": "@0"
 				},
 				{
-					"id": "substrateCommands",
-					"name": "Node",
+					"id": "substrateRuntimes",
+					"name": "Select runtime",
 					"group": "@1"
 				},
 				{

@@ -8,7 +8,7 @@ export class CommandsProvider implements vscode.TreeDataProvider<vscode.TreeItem
 
   constructor() {
 
-    const isTheia = os.hostname().startsWith('theia-substrate-') || true; // temp
+    const isTheia = os.hostname().startsWith('theia-substrate-');
 
     let commands = [];
     if (isTheia) {
