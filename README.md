@@ -1,8 +1,8 @@
 # Substrate Marketplace - VSCode extension
 
-Browse and install pallets from the Substrate Marketplace.
+Browse and install pallets from the Substrate Marketplace and manage your node.
 
-![Screenshot](./screenshot.png)
+![Screenshot](./screenshot.jpg)
 
 https://github.com/paritytech/substrate-playground/issues/28
 
