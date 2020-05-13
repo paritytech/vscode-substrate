@@ -19,34 +19,59 @@
 	],
 	"main": "./out/extension.js",
 	"contributes": {
+		"viewsContainers": {
+			"activitybar": [
+				{
+					"id": "substrate",
+					"title": "Substrate",
+					"icon": "resources/substrate.svg"
+				}
+			]
+		},
 		"views": {
-			"explorer": [
+			"substrate": [
+				{
+					"id": "substrateCommands",
+					"name": "Node operations",
+					"group": "@0"
+				},
+				{
+					"id": "substrateRuntimes",
+					"name": "Select runtime",
+					"group": "@1"
+				},
 				{
 					"id": "substrateMarketplace",
-					"name": "Substrate Marketplace"
+					"name": "Marketplace",
+					"group": "@2"
 				}
 			]
 		},
 		"commands": [
 			{
+				"command": "substrateCommands.runCommand",
+				"title": "Run",
+				"icon": "resources/play.svg"
+			},
+			{
 				"command": "substrateMarketplace.palletHomepage",
 				"title": "Homepage",
-				"icon": "$(home)"
+				"icon": "resources/home.svg"
 			},
 			{
 				"command": "substrateMarketplace.palletGithub",
 				"title": "GitHub",
-				"icon": "$(github)"
+				"icon": "resources/github.svg"
 			},
 			{
 				"command": "substrateMarketplace.palletDocumentation",
 				"title": "Documentation",
-				"icon": "$(book)"
+				"icon": "resources/book.svg"
 			},
 			{
 				"command": "substrateMarketplace.installPallet",
 				"title": "Add pallet to runtime",
-				"icon": "$(add)"
+				"icon": "resources/add.svg"
 			}
 		],
 		"menus": {
@@ -69,6 +94,11 @@
 				}
 			],
 			"view/item/context": [
+				{
+					"command": "substrateCommands.runCommand",
+					"when": "view == substrateCommands && viewItem == command",
+					"group": "inline@0"
+				},
 				{
 					"command": "substrateMarketplace.palletHomepage",
 					"when": "view == substrateMarketplace && viewItem == pallet || view == substrateMarketplace && viewItem == palletInstalled",
@@ -106,6 +136,7 @@
 	"dependencies": {
 		"@types/lodash": "^4.14.149",
 		"@types/node-fetch": "^2.5.5",
+		"array-flat-polyfill": "^1.0.1",
 		"glob": "^7.1.6",
 		"lodash": "^4.17.15",
 		"node-fetch": "^2.6.0",

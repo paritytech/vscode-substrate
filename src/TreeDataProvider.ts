@@ -1,6 +1,9 @@
 import * as vscode from 'vscode';
 import {Category, Pallet} from './types';
+import { BehaviorSubject } from 'rxjs';
 import CurrentRuntime from './runtimes/CurrentRuntime';
+
+const path = require('path');
 
 type TreeItem = TreePallet | TreeCategory;
 
@@ -10,19 +13,19 @@ export class TreeDataProvider implements vscode.TreeDataProvider<TreeItem> {
   private _onDidChangeTreeData: vscode.EventEmitter<TreeCategory | undefined> = new vscode.EventEmitter<TreeCategory | undefined>();
   readonly onDidChangeTreeData: vscode.Event<TreeCategory | undefined> = this._onDidChangeTreeData.event;
 
-  constructor(data: any, currentRuntime: CurrentRuntime) {
+  constructor(data: any, selectedRuntimeChanges$: BehaviorSubject<any>) {
     this.treeCategories = data.map((category: any) => {
       return new TreeCategory(category, category.pallets.map(TreePallet.create.bind(TreePallet)));
     });
 
     // TODO Reinstantiating all pallets would be cleaner (shared logic when instantiating)
-    currentRuntime.changes$.subscribe((changes) => {
+    selectedRuntimeChanges$.subscribe((changes) => {
       this.treeCategories.forEach(treeCategory => {
           treeCategory.children?.forEach(treePallet => {
             treePallet.contextValue = changes && changes.deps.includes(treePallet.name)
               ? 'palletInstalled' // TODO work from a single source of truth and have a clear mapping instead (see above comment); pure functions
               : 'pallet';
-            treePallet.iconPath = treePallet.contextValue === 'palletInstalled' ? new vscode.ThemeIcon('check') : false;
+            treePallet.iconPath = treePallet.contextValue === 'palletInstalled' ? path.join(__filename, '..', '..', 'resources', 'check.svg') : false;
           });
       });
       this._onDidChangeTreeData.fire();
