@@ -1,8 +1,8 @@
 import * as vscode from 'vscode';
 const path = require('path');
 
-import Runtimes from './runtimes/Runtimes';
-import Runtime from './runtimes/Runtime';
+import Runtimes from '../../runtimes/Runtimes';
+import Runtime from '../../runtimes/Runtime';
 
 /**
  * Returns a manifest path to operate on.

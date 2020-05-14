@@ -1,8 +1,7 @@
 
 const child_process = require('child_process');
 import * as vscode from 'vscode';
-
-import { resolveWhenTerminalClosed } from './util';
+import { resolveWhenTerminalClosed } from '../../util';
 
 /**
  * Ensures that substrate-deps is installed; installs it otherwise.

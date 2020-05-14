@@ -7,7 +7,7 @@ const map = require('lodash/fp/map');
 const remove = require('lodash/fp/remove');
 
 import { Category, Pallet } from './types';
-import { GRAPHQL_API_ENDPOINT } from './constants';
+import { GRAPHQL_API_ENDPOINT } from '../../constants';
 
 /**
  * Executes the given GraphQL query on the Marketplace endpoint, returns
