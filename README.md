@@ -8,7 +8,7 @@ https://github.com/paritytech/substrate-playground/issues/28
 
 ## Installation
 
-Head over to the [Releases](https://github.com/axelchalon/vscode-marketplace/releases) page and download the `.vsix` file from the latest release. Open VSCode, and run "Extensions: Install from VSIX" in your command palette.
+Head over to the [Releases](https://github.com/paritytech/vscode-substrate/releases) page and download the `.vsix` file from the latest release. Open VSCode, and run "Extensions: Install from VSIX" in your command palette.
 
 ## Development
 
