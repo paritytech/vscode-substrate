@@ -48,7 +48,7 @@ const fetchPallets = (category: string): Promise<Pallet[]> =>
 						description
 						documentation
 						homepage
-						github: readme
+						github: repository
 						icon
 						version
 						repository
