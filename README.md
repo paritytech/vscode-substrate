@@ -2,13 +2,21 @@
 
 Browse and install pallets from the Substrate Marketplace and manage your node.
 
+Visit the extension's page on Visual Studio Marketplace: https://marketplace.visualstudio.com/items?itemName=paritytech.vscode-substrate
+
 ![Screenshot](./screenshot.jpg)
 
-https://github.com/paritytech/substrate-playground/issues/28
+This extension is work in progress and is in active development. Please [report](https://github.com/paritytech/vscode-substrate/issues/new) any issues you encounter. The context and roadmap can be found [here](https://github.com/paritytech/substrate-playground/issues/28).
 
 ## Installation
 
-Head over to the [Releases](https://github.com/paritytech/vscode-substrate/releases) page and download the `.vsix` file from the latest release. Open VSCode, and run "Extensions: Install from VSIX" in your command palette.
+Launch VS Code Quick Open (Ctrl+P), paste the following command, and press enter.
+
+```
+ext install paritytech.vscode-substrate
+```
+
+Alternatively, search for "VSCode Substrate" in the extension marketplace.
 
 ## Development
 
