@@ -22,6 +22,18 @@ export class RuntimesProvider implements vscode.TreeDataProvider<RuntimeTreeItem
     });
   }
 
+  changeSelected(selectedRuntimePath: string) {
+    this.runtimeTreeItems.forEach((runtimeTreeItem) => {
+      console.log(selectedRuntimePath, runtimeTreeItem.runtimePath);
+      if (runtimeTreeItem.runtimePath === selectedRuntimePath)
+        runtimeTreeItem.select();
+      else
+        runtimeTreeItem.unselect();
+    });
+    this._onDidChangeTreeData.fire();
+
+  }
+
   getTreeItem(element: RuntimeTreeItem): RuntimeTreeItem | Thenable<RuntimeTreeItem> {
     return element;
   }
@@ -36,7 +48,7 @@ export class RuntimesProvider implements vscode.TreeDataProvider<RuntimeTreeItem
 
 export class RuntimeTreeItem extends vscode.TreeItem {
   children: undefined;
-  name: string;
+  runtimePath: string;
 
   static create(info: Runtime) {
     return new this(info);
@@ -47,12 +59,20 @@ export class RuntimeTreeItem extends vscode.TreeItem {
     super(
       tryShortname(runtimePath),
       vscode.TreeItemCollapsibleState.None);
-    this.name = runtimePath;
+    this.runtimePath = runtimePath;
     this.command = {
       command: "substrateRuntimes.selectRuntime",
       title: "Select Runtime",
       arguments: [this]
     };
+  }
+
+  select() {
+    this.label = '▶️ ' + tryShortname(this.runtimePath);
+  }
+
+  unselect() {
+    this.label = tryShortname(this.runtimePath);
   }
 }
 
@@ -79,9 +99,11 @@ export function setUpRuntimesTreeView(runtimes: Runtimes) {
       tap(r => console.log('Selected runtime \'changes\' fired with', r))
     ).subscribe(selectedRuntimeChanges$);
 
-    vscode.window.createTreeView('substrateRuntimes', { treeDataProvider: new RuntimesProvider(runtimes) });
+    const treeDataProvider = new RuntimesProvider(runtimes);
+    vscode.window.createTreeView('substrateRuntimes', { treeDataProvider });
     vscode.commands.registerCommand("substrateRuntimes.selectRuntime", (item: vscode.TreeItem) => {
-      selectedRuntimePath$.next((item as any).name || null);
+      selectedRuntimePath$.next((item as any).runtimePath || null);
+      treeDataProvider.changeSelected((item as any).runtimePath || null);
     });
 
     return { selectedRuntimeChanges$ };
