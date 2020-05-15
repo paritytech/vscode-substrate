@@ -6,7 +6,7 @@ const matchAll = require('string.prototype.matchall')
  * Given the contents of a Cargo.toml, extract the list of pallet names.
  */
 function parseDeps(text: string) : string[] {
- return uniq(Array.from(matchAll(text, /'(pallet-[a-z-A-Z0-9]+)'/g)).map((match: any) => match[1]));
+ return uniq(Array.from(matchAll(text, /(pallet-[a-z-A-Z0-9-]+)/g)).map((match: any) => match[1]));
 }
 
 /**
