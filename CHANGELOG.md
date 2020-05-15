@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.3.1
+
+* Marketplace is now loaded on startup
+* Selected runtime now highlighted
+* Fix parsing runtime pallets
+
 ## v0.3.0
 
 * Support multiple nodes
