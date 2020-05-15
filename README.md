@@ -1,4 +1,4 @@
-# Substrate Marketplace - VSCode extension
+# Substrate - VSCode extension
 
 Browse and install pallets from the Substrate Marketplace and manage your node.
 
