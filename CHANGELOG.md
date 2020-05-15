@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.3.2
+
+* Fix Playground detection
+* Fix pallets GitHub target
+
 ## v0.3.1
 
 * Marketplace is now loaded on startup
