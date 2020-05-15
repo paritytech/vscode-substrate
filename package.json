@@ -2,7 +2,7 @@
 	"name": "vscode-substrate",
 	"displayName": "VSCode Substrate",
 	"description": "Manage your Substrate node and add pallets from the Marketplace to your runtime",
-	"version": "0.3.2",
+	"version": "0.3.3",
 	"publisher": "paritytech",
 	"icon": "resources/icon.png",
 	"repository": {
