@@ -42,7 +42,7 @@ class Item extends vscode.TreeItem {
     this.name = name;
     if (name) {
       this.contextValue = 'command';
-      this.iconPath = path.join(__filename, '..', '..', '..', 'resources', 'gear.svg');
+      this.iconPath = path.join(__filename, '..', '..', '..', '..', 'resources', 'gear.svg');
     } else {
       this.contextValue = 'separator';
       this.description = '—';
