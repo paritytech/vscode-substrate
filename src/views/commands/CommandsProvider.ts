@@ -10,7 +10,7 @@ export class CommandsProvider implements vscode.TreeDataProvider<vscode.TreeItem
   items: vscode.TreeItem[];
 
   constructor() {
-    const isTheia = os.hostname().startsWith('theia-');
+    const isTheia = process.env.SUBSTRATE_PLAYGROUND !== undefined;
 
     this.items = (isTheia ? playgroundCommands : vscodeCommands).map(command => {
       return new Item(command[0]);
