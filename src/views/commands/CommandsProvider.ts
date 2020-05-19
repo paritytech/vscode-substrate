@@ -10,9 +10,9 @@ export class CommandsProvider implements vscode.TreeDataProvider<vscode.TreeItem
   items: vscode.TreeItem[];
 
   constructor() {
-    const isTheia = process.env.SUBSTRATE_PLAYGROUND !== undefined;
+    // const isTheia = process.env.SUBSTRATE_PLAYGROUND !== undefined;
 
-    this.items = (isTheia ? playgroundCommands : vscodeCommands).map(command => {
+    this.items = (vscodeCommands).map(command => {
       return new Item(command[0]);
     });
   }
@@ -104,39 +104,10 @@ const vscodeCommands: (Command | Separator)[] = [
   }]
 ];
 
-const playgroundCommands: (Command | Separator)[] = [
-  ['Getting started', () => vscode.commands.executeCommand("getting.started.widget")],
-  [''],
-  ...vscodeCommands,
-  ['Polkadot Apps', () => {
-    const INSTANCE_UUID = process.env.SUBSTRATE_PLAYGROUND_INSTANCE;
-    const nodeWebSocket = `wss://${INSTANCE_UUID}.playground.substrate.dev/wss`
-    const polkadotAppsURL = `https://polkadot.js.org/apps/?rpc=${nodeWebSocket}`;
-    vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(polkadotAppsURL));
-  }],
-  ['Start front-end', () => {
-    const INSTANCE_UUID = process.env.SUBSTRATE_PLAYGROUND_INSTANCE;
-    const nodeWebSocket = `wss://${INSTANCE_UUID}.playground.substrate.dev/wss`
-    const port = 8000;
-    const term = vscode.window.createTerminal({ name: 'Start front-end', cwd: '/home/workspace/substrate-front-end-template' });
-    term.sendText(`REACT_APP_PROVIDER_SOCKET=${nodeWebSocket} yarn build && rm -rf front-end/ && mv build front-end && python -m SimpleHTTPServer ${port}\r`);
-    term.show();
-  }],
-  ['Open front-end', () => {
-    const INSTANCE_UUID = process.env.SUBSTRATE_PLAYGROUND_INSTANCE;
-    const frontendURL = `https://${INSTANCE_UUID}.playground.substrate.dev/front-end`;
-    vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(frontendURL));
-  }],
-  ['Take the tour', () => vscode.commands.executeCommand("TheiaSubstrateExtension.tour-command")],
-  [''],
-  ['Download archive', () => vscode.commands.executeCommand("TheiaSubstrateExtension.download-archive-command")],
-  ['Send feedback', () => vscode.commands.executeCommand('vscode.open', vscode.Uri.parse('https://docs.google.com/forms/d/e/1FAIpQLSdXpq_fHqS_ow4nC7EpGmrC_XGX_JCIRzAqB1vaBtoZrDW-ZQ/viewform?edit_requested=true'))],
-]
-
 export function setUpCommandsTreeView() {
   vscode.window.createTreeView('substrateCommands', { treeDataProvider: new CommandsProvider() });
   vscode.commands.registerCommand("substrateCommands.runCommand", async (item: vscode.TreeItem & { name: string }) => {
-    const command = playgroundCommands.find(command => command[0] === item.name);
+    const command = vscodeCommands.find(command => command[0] === item.name);
     if (!command) console.error('No command found with that name');
     (command as Command)[1]();
   });
