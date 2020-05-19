@@ -94,12 +94,12 @@ const vscodeCommands: (Command | Separator)[] = [
   }],
   ['Start node', async () => {
     const term = vscode.window.createTerminal({ name: 'Start node', cwd: await getNodeTemplatePath() });
-    term.sendText('./target/release/node-template --dev --ws-external');
+    term.sendText('cargo run -- --dev --ws-external');
     term.show();
   }],
   ['Purge chain', async () => {
     const term = vscode.window.createTerminal({ name: 'Purge chain', cwd: await getNodeTemplatePath() });
-    term.sendText('./target/release/node-template purge-chain --dev');
+    term.sendText('cargo run -- purge-chain --dev');
     term.show();
   }]
 ];
