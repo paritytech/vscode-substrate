@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.3.4
+
+* Fix commands "Start node" and "Purge chain"
+* Remove playground-specific commands
+
 ## v0.3.2
 
 * Fix Playground detection
