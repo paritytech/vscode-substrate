@@ -106,8 +106,10 @@ const vscodeCommands: (Command | Separator)[] = [
 
 export function setUpCommandsTreeView() {
   vscode.window.createTreeView('substrateCommands', { treeDataProvider: new CommandsProvider() });
-  vscode.commands.registerCommand("substrateCommands.runCommand", async (item: vscode.TreeItem & { name: string }) => {
-    const command = vscodeCommands.find(command => command[0] === item.name);
+  vscode.commands.registerCommand("substrateCommands.runCommand", async (item: string | (vscode.TreeItem & { name: string })) => {
+    const xname = typeof item === 'string' ? item : item.name;
+    const command = vscodeCommands.find(command => command[0] === xname);
+
     if (!command) console.error('No command found with that name');
     (command as Command)[1]();
   });

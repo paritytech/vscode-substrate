@@ -30,6 +30,12 @@
 	],
 	"main": "./out/extension.js",
 	"contributes": {
+			"viewsWelcome": [
+				{
+					"view": "substrateRuntimes",
+					"contents": "No runtime was found in your current workspace.\n[Open folder](command:vscode.openFolder)"
+				}
+			],
 		"viewsContainers": {
 			"activitybar": [
 				{
@@ -44,17 +50,17 @@
 				{
 					"id": "substrateCommands",
 					"name": "Node operations",
-					"group": "@0"
+					"group": "@1"
 				},
 				{
 					"id": "substrateRuntimes",
 					"name": "Select runtime",
-					"group": "@1"
+					"group": "@2"
 				},
 				{
 					"id": "substrateMarketplace",
 					"name": "Marketplace",
-					"group": "@2"
+					"group": "@3"
 				}
 			]
 		},
