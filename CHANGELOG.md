@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.4.0
+
+* Reorganized UI : now shows the list of nodes in the workspace. The marketplace is based on the runtime of the selected node.
+* Node commands accessible in the Command Palette.
+
 ## v0.3.4
 
 * Fix commands "Start node" and "Purge chain"
