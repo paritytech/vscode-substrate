@@ -4,6 +4,8 @@ import { setUpCommandsTreeView } from './views/commands/CommandsProvider';
 import { setUpMarketplaceTreeView } from './views/marketplace/MarketplaceProvider';
 import { setUpRuntimesTreeView } from './views/runtimes/RuntimesProvider';
 import Runtimes from './runtimes/Runtimes';
+import { setUpNodesTreeView } from './views/nodes/NodesProvider';
+import Nodes from './nodes/Nodes';
 
 const fs = require('fs');
 const path = require('path');
@@ -21,20 +23,22 @@ export function activate(context: vscode.ExtensionContext) {
 		resultPanel.webview.onDidReceiveMessage(message => {
 			if (message.command === 'tour') {
 				vscode.commands.executeCommand("TheiaSubstrateExtension.tour-command");
+			} else if (message.command === 'showPanel') {
+				vscode.commands.executeCommand("workbench.view.extension.substrate");
 			}
 		}, undefined, context.subscriptions);
 	}
 
-	const runtimes = new Runtimes();
+	const nodes = new Nodes();
 
 	// Set up commands
-	setUpCommandsTreeView();
+	// setUpCommandsTreeView();
 
 	// Set up runtimes
-	const { selectedRuntimeChanges$ } = setUpRuntimesTreeView(runtimes);
+	const { selectedNode$ } = setUpNodesTreeView(nodes);
 
 	// Set up marketplace
-	setUpMarketplaceTreeView(runtimes, selectedRuntimeChanges$);
+	setUpMarketplaceTreeView(nodes, selectedNode$);
 }
 
 export function deactivate() { }

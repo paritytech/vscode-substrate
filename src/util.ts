@@ -21,6 +21,7 @@ export function vscToObservable<T>(fn: (arg0: ((x: T) => any)) => any): Observab
 }
 
 export function tryShortname(fullPath: string) {
+  return fullPath;
   const workspaceRoot = vscode.workspace.workspaceFolders?.map((x) => x.uri.fsPath)[0];
   if (!workspaceRoot) return fullPath;
   return path.relative(workspaceRoot, fullPath);

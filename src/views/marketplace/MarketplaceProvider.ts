@@ -5,6 +5,7 @@ import fetchCategories from './fetchCategories';
 import { getManifestPath } from './getRuntimeManifestPath';
 import { substrateDepsInstalled } from './substrateDeps';
 import { Category, Pallet } from './types';
+import Nodes, { Node } from '../../nodes/Nodes';
 
 const path = require('path');
 
@@ -16,16 +17,16 @@ export class TreeDataProvider implements vscode.TreeDataProvider<TreeItem> {
   private _onDidChangeTreeData: vscode.EventEmitter<TreeCategory | undefined> = new vscode.EventEmitter<TreeCategory | undefined>();
   readonly onDidChangeTreeData: vscode.Event<TreeCategory | undefined> = this._onDidChangeTreeData.event;
 
-  constructor(data: any, selectedRuntimeChanges$: BehaviorSubject<any>) {
+  constructor(data: any, selectedNode$: BehaviorSubject<Node | null>) {
     this.treeCategories = data.map((category: any) => {
       return new TreeCategory(category, category.pallets.map(TreePallet.create.bind(TreePallet)));
     });
 
     // TODO Reinstantiating all pallets would be cleaner (shared logic when instantiating)
-    selectedRuntimeChanges$.subscribe((changes) => {
+    selectedNode$.subscribe((node) => {
       this.treeCategories.forEach(treeCategory => {
           treeCategory.children?.forEach(treePallet => {
-            treePallet.contextValue = changes && changes.deps.includes(treePallet.name)
+            treePallet.contextValue = node && node.deps && node.deps.includes(treePallet.name)
               ? 'palletInstalled' // TODO work from a single source of truth and have a clear mapping instead (see above comment); pure functions
               : 'pallet';
             treePallet.iconPath = treePallet.contextValue === 'palletInstalled' ? path.join(__filename, '..', '..', '..', '..', 'resources', 'check.svg') : false;
@@ -87,13 +88,13 @@ export class TreePallet extends vscode.TreeItem {
   }
 }
 
-type Change = { runtimePath: string; deps: string[], shortname: string } | null;
-export function setUpMarketplaceTreeView(runtimes: Runtimes, selectedRuntimeChanges$: BehaviorSubject<Change>) {
+type NodePath = string | null;
+export function setUpMarketplaceTreeView(nodes: Nodes, selectedNode$: BehaviorSubject<Node | null>) {
   fetchCategories().then((categories: Category[]) => {
-    const treeView = vscode.window.createTreeView('substrateMarketplace', { treeDataProvider: new TreeDataProvider(categories, selectedRuntimeChanges$) });
-    selectedRuntimeChanges$.subscribe((change) => {
-      if (change && runtimes.runtimes$.getValue().length > 1)
-        treeView.message = `Selected runtime: ${change.shortname || change.runtimePath}`; // todo
+    const treeView = vscode.window.createTreeView('substrateMarketplace', { treeDataProvider: new TreeDataProvider(categories, selectedNode$) });
+    selectedNode$.subscribe((node) => {
+      if (node)
+        treeView.message = `Runtime: ${node.runtimePath}`;
       else
         treeView.message = ``;
     });
@@ -139,12 +140,12 @@ export function setUpMarketplaceTreeView(runtimes: Runtimes, selectedRuntimeChan
       // Get manifest path
       let manifestPath: string;
       try {
-        let selectedRuntimeChanges = selectedRuntimeChanges$.getValue();
-        if (!selectedRuntimeChanges) {
-          vscode.window.showErrorMessage('Please first select a runtime.');
+        let selectedNodeRuntimePath = selectedNode$.getValue()?.runtimePath;
+        if (!selectedNodeRuntimePath) {
+          vscode.window.showErrorMessage('Please first select a node.');
           return;
         }
-        manifestPath = await getManifestPath(selectedRuntimeChanges?.runtimePath || null, runtimes);
+        manifestPath = path.join(selectedNodeRuntimePath, 'Cargo.toml');
       } catch (e) {
         return;
       }
@@ -167,7 +168,7 @@ export function setUpMarketplaceTreeView(runtimes: Runtimes, selectedRuntimeChan
   }, (async r => { // Offer to retry in case fetching the categories failed
     const clicked = await vscode.window.showErrorMessage(`An error occured when fetching the list of pallets from the Substrate Marketplace: ${r}`, 'Try again');
     if (clicked === 'Try again') {
-      return setUpMarketplaceTreeView(runtimes, selectedRuntimeChanges$);
+      return setUpMarketplaceTreeView(nodes, selectedNode$);
     }
   }));
 
