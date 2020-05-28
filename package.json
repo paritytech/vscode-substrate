@@ -30,12 +30,16 @@
 	],
 	"main": "./out/extension.js",
 	"contributes": {
-			"viewsWelcome": [
-				{
-					"view": "substrateRuntimes",
-					"contents": "No runtime was found in your current workspace.\n[Open folder](command:vscode.openFolder)"
-				}
-			],
+		"viewsWelcome": [
+			{
+				"view": "substrateNodes",
+				"contents": "No node was found in your current workspace.\n[Open folder](command:vscode.openFolder)"
+			},
+			{
+				"view": "substrateMarketplace",
+				"contents": "Please select a node above."
+			}
+		],
 		"viewsContainers": {
 			"activitybar": [
 				{
@@ -48,27 +52,27 @@
 		"views": {
 			"substrate": [
 				{
-					"id": "substrateCommands",
-					"name": "Node operations",
+					"id": "substrateNodes",
+					"name": "Select node",
 					"group": "@1"
-				},
-				{
-					"id": "substrateRuntimes",
-					"name": "Select runtime",
-					"group": "@2"
 				},
 				{
 					"id": "substrateMarketplace",
 					"name": "Marketplace",
-					"group": "@3"
+					"group": "@2"
 				}
 			]
 		},
 		"commands": [
 			{
-				"command": "substrateCommands.runCommand",
-				"title": "Run",
-				"icon": "resources/play.svg"
+				"command": "substrate.startNode",
+				"title": "Substrate: Start node",
+				"icon": "resources/startNode.svg"
+			},
+			{
+				"command": "substrate.purgeChain",
+				"title": "Substrate: Purge chain",
+				"icon": "resources/purgeChain.svg"
 			},
 			{
 				"command": "substrateMarketplace.palletHomepage",
@@ -112,9 +116,14 @@
 			],
 			"view/item/context": [
 				{
-					"command": "substrateCommands.runCommand",
-					"when": "view == substrateCommands && viewItem == command",
+					"command": "substrate.startNode",
+					"when": "view == substrateNodes",
 					"group": "inline@0"
+				},
+				{
+					"command": "substrate.purgeChain",
+					"when": "view == substrateNodes",
+					"group": "inline@1"
 				},
 				{
 					"command": "substrateMarketplace.palletHomepage",
