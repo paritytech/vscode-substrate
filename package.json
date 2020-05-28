@@ -30,12 +30,12 @@
 	],
 	"main": "./out/extension.js",
 	"contributes": {
-			"viewsWelcome": [
-				{
-					"view": "substrateRuntimes",
-					"contents": "No runtime was found in your current workspace.\n[Open folder](command:vscode.openFolder)"
-				}
-			],
+		"viewsWelcome": [
+			{
+				"view": "substrateRuntimes",
+				"contents": "No runtime was found in your current workspace.\n[Open folder](command:vscode.openFolder)"
+			}
+		],
 		"viewsContainers": {
 			"activitybar": [
 				{
