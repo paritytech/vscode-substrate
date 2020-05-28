@@ -27,9 +27,7 @@ export class NodesProvider implements vscode.TreeDataProvider<NodeTreeItem> {
   }
 
   changeSelected(selectedNodePath: string | null) {
-    console.log('changeSelected fired with',selectedNodePath);
     this.nodeTreeItems.forEach((nodeTreeItem) => {
-      console.log(selectedNodePath, nodeTreeItem.nodePath);
       if (nodeTreeItem.nodePath === selectedNodePath)
         nodeTreeItem.select();
       else
@@ -137,7 +135,6 @@ export function setUpNodesTreeView(nodes: Nodes) {
     combineLatest(selectedNodePath$, nodes.nodes$)
       .pipe(
       switchMap(([nodePath, nodes]: [string | null, Node[]]) => {
-        console.log('fire inthe hose',nodePath, nodes);
         if (!nodePath) return of(null);
         const selectedNode = nodes.find(node => node.nodePath === nodePath);
         if (selectedNode === undefined) {
