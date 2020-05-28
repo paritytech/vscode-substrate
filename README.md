@@ -4,7 +4,7 @@ Browse and install pallets from the Substrate Marketplace and manage your node.
 
 Visit the extension's page on Visual Studio Marketplace: https://marketplace.visualstudio.com/items?itemName=paritytech.vscode-substrate
 
-![Screenshot](./screenshot.jpg)
+![Screenshot](./screenshot.png)
 
 This extension is work in progress and is in active development. Please [report](https://github.com/paritytech/vscode-substrate/issues/new) any issues you encounter. The context and roadmap can be found [here](https://github.com/paritytech/substrate-playground/issues/28).
 
