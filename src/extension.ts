@@ -13,7 +13,7 @@ export function activate(context: vscode.ExtensionContext) {
 	const isTheia = process.env.SUBSTRATE_PLAYGROUND !== undefined;
 
 	if (isTheia) { // TODO as such, should maybe not be
-		var resultPanel = vscode.window.createWebviewPanel("welcome", "Getting started", vscode.ViewColumn.One, {enableScripts: true, enableCommandUris: true});
+		var resultPanel = vscode.window.createWebviewPanel("welcome", "Getting started", vscode.ViewColumn.One, {enableScripts: true, enableCommandUris: true, retainContextWhenHidden: true});
 		resultPanel.webview.html = fs.readFileSync(path.join(__filename, '..', '..', 'resources', 'welcome.html')).toString();
 
 		resultPanel.webview.onDidReceiveMessage(message => {
