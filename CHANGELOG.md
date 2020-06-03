@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.4.2
+* Retain Getting started view in cache when the tab loses focus
+
+## v0.4.1
+* Lint
+
 ## v0.4.0
 
 * Reorganized UI : now shows the list of nodes in the workspace. The marketplace is based on the runtime of the selected node.
