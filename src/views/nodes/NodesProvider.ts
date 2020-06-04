@@ -115,7 +115,7 @@ export function setUpNodesTreeView(nodes: Nodes) {
         selectedNodePath$.next(nodePath); // select the item we launch the command on
       }
       const term = vscode.window.createTerminal({ name: 'Start node', cwd: nodePath || await quickPickNodePath(nodes) });
-      term.sendText('cargo run -- --dev --ws-external');
+      term.sendText('cargo run --release -- --dev --ws-external');
       term.show();
     });
 

@@ -103,7 +103,7 @@ export function setUpMarketplaceTreeView(nodes: Nodes, selectedNode$: BehaviorSu
       if (node && node.runtimePath)
         treeView.message = `Runtime: ${tryShortname(node.runtimePath)}`;
       else
-        treeView.message = undefined;
+        treeView.message = `Please select a node above.`;
     });
 
     // Set up commands: documentation, github, homepage

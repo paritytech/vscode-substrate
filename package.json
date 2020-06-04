@@ -34,10 +34,6 @@
 			{
 				"view": "substrateNodes",
 				"contents": "No node was found in your current workspace.\n[Open folder](command:vscode.openFolder)"
-			},
-			{
-				"view": "substrateMarketplace",
-				"contents": "Please select a node above."
 			}
 		],
 		"viewsContainers": {
