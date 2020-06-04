@@ -1,5 +1,8 @@
 # Changelog
 
+## v0.4.3
+* The start node command now compiles in release mode.
+
 ## v0.4.2
 * Retain Getting started view in cache when the tab loses focus
 
