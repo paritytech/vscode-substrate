@@ -101,7 +101,7 @@ async function quickPickNodePath(nodes: Nodes) {
 }
 
 
-export function setUpNodesTreeView(nodes: Nodes) {
+export function setUpNodesTreeView(nodes: Nodes, processes: any) {
 
     // vscode.commands.registerCommand("substrate.compileNode", async (nodePath?: string) => {
     //   const term = vscode.window.createTerminal({ name: 'Compile node', cwd: nodePath || await quickPickNodePath(nodes) });
@@ -114,9 +114,12 @@ export function setUpNodesTreeView(nodes: Nodes) {
       if (nodePath) {
         selectedNodePath$.next(nodePath); // select the item we launch the command on
       }
-      const term = vscode.window.createTerminal({ name: 'Start node', cwd: nodePath || await quickPickNodePath(nodes) });
+      const defNodePath = nodePath || await quickPickNodePath(nodes);
+      const term = vscode.window.createTerminal({ name: 'Start node ' + tryShortname(defNodePath), cwd: defNodePath });
       term.sendText('cargo run --release -- --dev --ws-external');
       term.show();
+
+      processes.new({nodePath: defNodePath, command: 'cargo run --release -- --dev --ws-external', term: term});
     });
 
     vscode.commands.registerCommand("substrate.purgeChain", async (nodePathLike?: string | NodeTreeItem) => {

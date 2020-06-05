@@ -32,6 +32,10 @@
 	"contributes": {
 		"viewsWelcome": [
 			{
+				"view": "substrateProcesses",
+				"contents": "No node is currently running."
+			},
+			{
 				"view": "substrateNodes",
 				"contents": "No node was found in your current workspace.\n[Open folder](command:vscode.openFolder)"
 			}
@@ -48,6 +52,11 @@
 		"views": {
 			"substrate": [
 				{
+					"id": "substrateProcesses",
+					"name": "Processes",
+					"group": "@0"
+				},
+				{
 					"id": "substrateNodes",
 					"name": "Select node",
 					"group": "@1"
@@ -60,6 +69,11 @@
 			]
 		},
 		"commands": [
+			{
+				"command": "substrate.stopProcess",
+				"title": "Substrate: Stop process",
+				"icon": "resources/stopProcess.svg"
+			},
 			{
 				"command": "substrate.startNode",
 				"title": "Substrate: Start node",
@@ -111,6 +125,11 @@
 				}
 			],
 			"view/item/context": [
+				{
+					"command": "substrate.stopProcess",
+					"when": "view == substrateProcesses",
+					"group": "inline@1"
+				},
 				{
 					"command": "substrate.startNode",
 					"when": "view == substrateNodes",
