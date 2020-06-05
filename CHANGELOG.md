@@ -1,5 +1,8 @@
 # Changelog
 
+## v0.4.4
+* List running nodes
+
 ## v0.4.3
 * The start node command now compiles in release mode.
 
