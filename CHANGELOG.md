@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.4.5
+* Polkadot Apps link on Substrate Playground
+* Ask user for flags when launching node
+
 ## v0.4.4
 * List running nodes
 
