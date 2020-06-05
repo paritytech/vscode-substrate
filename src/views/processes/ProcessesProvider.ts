@@ -101,5 +101,12 @@ export function setupProcessesTreeView(processes: Processes) {
     });
 
     const treeDataProvider = new ProcessesProvider(processes);
-    vscode.window.createTreeView('substrateProcesses', { treeDataProvider });
+    const treeView = vscode.window.createTreeView('substrateProcesses', { treeDataProvider });
+
+    processes.processes$.subscribe((processes: Process[]) => {
+      if (processes.length === 0 && isTheia)
+        treeView.message = `No node is currently running.`;
+      else
+        treeView.message = undefined;
+    });
 }
