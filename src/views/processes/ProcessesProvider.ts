@@ -33,6 +33,8 @@ export class ProcessesProvider implements vscode.TreeDataProvider<ProcessTreeIte
   }
 }
 
+const isTheia = process.env.SUBSTRATE_PLAYGROUND !== undefined;
+
 export class ProcessTreeItem extends vscode.TreeItem {
   children: undefined;
   process: Process;
@@ -48,6 +50,8 @@ export class ProcessTreeItem extends vscode.TreeItem {
       title: "Select Process",
       arguments: [this]
     };
+
+    this.contextValue = isTheia ? 'theia' : 'vscode'
   }
 }
 
@@ -72,8 +76,18 @@ async function quickPickProcesses(_processes: Processes) {
   return processes[processesReadable.findIndex(x => x === pick)];
 }
 
+const INSTANCE = process.env.SUBSTRATE_PLAYGROUND_INSTANCE;
 
 export function setupProcessesTreeView(processes: Processes) {
+
+    vscode.commands.registerCommand("substrate.polkadotApps", async (processTreeItem?: ProcessTreeItem) => {
+      const process = processTreeItem?.process || await quickPickProcesses(processes);
+
+      const port = process.command.match(/--ws-port[ =]\d+/)?.[0] || '9944';
+      const wsEndpoint = `wss://${INSTANCE}.playground.substrate.dev${port !== '9944' ? `:${port}` : ''}/wss`;
+      const apps = `https://polkadot.js.org/apps/?rpc=${wsEndpoint}`;
+      vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(apps));
+    });
 
     vscode.commands.registerCommand("substrate.selectProcess", async (processTreeItem: ProcessTreeItem) => {
       processTreeItem.process.term.show();

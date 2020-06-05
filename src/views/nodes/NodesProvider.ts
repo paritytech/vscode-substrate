@@ -109,17 +109,28 @@ export function setUpNodesTreeView(nodes: Nodes, processes: any) {
     //   term.show();
     // });
 
-    vscode.commands.registerCommand("substrate.startNode", async (nodePathLike?: string | NodeTreeItem) => {
+    vscode.commands.registerCommand("substrate.startNode", async (nodePathLike?: string | NodeTreeItem, _flags?: string | string[]) => {
       let nodePath = nodePathLike instanceof NodeTreeItem ? nodePathLike.nodePath : nodePathLike;
       if (nodePath) {
         selectedNodePath$.next(nodePath); // select the item we launch the command on
       }
       const defNodePath = nodePath || await quickPickNodePath(nodes);
       const term = vscode.window.createTerminal({ name: 'Start node ' + tryShortname(defNodePath), cwd: defNodePath });
-      term.sendText('cargo run --release -- --dev --ws-external');
+
+      const flags = _flags ? (Array.isArray(_flags) ? _flags.join(' ') : _flags) : await vscode.window.showInputBox({
+        value: '--dev --ws-external',
+        prompt: 'Flags to run Substrate with',
+        ignoreFocusOut: true
+      });
+      if (!flags) return; // user canceled
+
+      // todo use ws port to use polkadot apps
+      // does it make sense to have two different polkadot apps endpoints ? two processes, one polkadot app endpoint ?
+
+      term.sendText(`cargo run --release -- ${flags}`);
       term.show();
 
-      processes.new({nodePath: defNodePath, command: 'cargo run --release -- --dev --ws-external', term: term});
+      processes.new({nodePath: defNodePath, command: flags, term: term});
     });
 
     vscode.commands.registerCommand("substrate.purgeChain", async (nodePathLike?: string | NodeTreeItem) => {

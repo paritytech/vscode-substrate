@@ -75,6 +75,11 @@
 				"icon": "resources/stopProcess.svg"
 			},
 			{
+				"command": "substrate.polkadotApps",
+				"title": "Substrate: Polkadot Apps",
+				"icon": "resources/apps.svg"
+			},
+			{
 				"command": "substrate.startNode",
 				"title": "Substrate: Start node",
 				"icon": "resources/startNode.svg"
@@ -125,6 +130,11 @@
 				}
 			],
 			"view/item/context": [
+				{
+					"command": "substrate.polkadotApps",
+					"when": "view == substrateProcesses && viewItem == theia",
+					"group": "inline@0"
+				},
 				{
 					"command": "substrate.stopProcess",
 					"when": "view == substrateProcesses",
