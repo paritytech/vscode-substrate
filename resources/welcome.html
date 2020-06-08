@@ -13,7 +13,16 @@
     </p>
 
     <p>
-    All substrate related documentation is available on <a href="https://substrate.dev">substrate.dev</a>.
+      All substrate related documentation is available on <a href="https://substrate.dev">substrate.dev</a>.
+    </p>
+
+    <p id="nnd" style="display: none;">
+      The current template provides these commands:
+      <ul>
+        <template id="templateTaskLi">
+          <li><a href="#" class="task" data-id=""></a></li>
+        </template>
+      </ul>
     </p>
 
     <p>
@@ -21,7 +30,35 @@
     </p>
 
     <script>
-      // const vscode = acquireVsCodeApi();
+      const vscode = acquireVsCodeApi();
+
+      // Handle the message inside the webview
+      window.addEventListener('message', event => {
+
+        const message = event.data; // The JSON data our extension sent
+
+        switch (message.command) {
+          case 'tasks':
+            message.payload.forEach((task) => {
+              var clon = templateTaskLi.content.cloneNode(true);
+              clon.querySelector('a').dataset.id = task.id;
+              clon.querySelector('a').innerText = task.name;
+              document.querySelector('ul').appendChild(clon);
+            });
+            nnd.style.display = 'block';
+            break;
+        }
+      });
+
+      document.querySelector('body').onclick = (function(e) {
+        if (e.target.classList.contains('task')) {
+          vscode.postMessage({
+            command: 'runTask',
+            taskId: e.target.dataset.id
+          })
+          return false;
+        }
+      });
 
       // tour.onclick = () => {
       //   vscode.postMessage({

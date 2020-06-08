@@ -68,4 +68,6 @@ export async function setupTasksTreeView() {
 
       vscode.tasks.executeTask(task);
     });
+
+    return tasks;
 }
