@@ -5,6 +5,7 @@ import { setUpNodesTreeView } from './views/nodes/NodesProvider';
 import Nodes from './nodes/Nodes';
 import Processes from './processes/Processes';
 import { setupProcessesTreeView } from './views/processes/ProcessesProvider';
+import { setupTasksTreeView } from './views/tasks/TasksProvider';
 
 const fs = require('fs');
 const path = require('path');
@@ -38,6 +39,9 @@ export function activate(context: vscode.ExtensionContext) {
 
 	// Set up processes
 	setupProcessesTreeView(processes);
+
+	// Set up tasks
+	setupTasksTreeView();
 }
 
 export function deactivate() { }

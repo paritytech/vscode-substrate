@@ -33,6 +33,10 @@
 		"viewsWelcome": [
 			{
 				"view": "substrateProcesses",
+				"contents": "No actions were found in this workspace."
+			},
+			{
+				"view": "substrateProcesses",
 				"contents": "No node is currently running."
 			},
 			{
@@ -52,23 +56,33 @@
 		"views": {
 			"substrate": [
 				{
+					"id": "substrateTasks",
+					"name": "Actions",
+					"group": "@0"
+				},
+				{
 					"id": "substrateProcesses",
 					"name": "Processes",
-					"group": "@0"
+					"group": "@1"
 				},
 				{
 					"id": "substrateNodes",
 					"name": "Select node",
-					"group": "@1"
+					"group": "@2"
 				},
 				{
 					"id": "substrateMarketplace",
 					"name": "Marketplace",
-					"group": "@2"
+					"group": "@3"
 				}
 			]
 		},
 		"commands": [
+			{
+				"command": "substrate.runTask",
+				"title": "Substrate: Execute action",
+				"icon": "resources/runTask.svg"
+			},
 			{
 				"command": "substrate.stopProcess",
 				"title": "Substrate: Stop process",
@@ -130,6 +144,11 @@
 				}
 			],
 			"view/item/context": [
+				{
+					"command": "substrate.runTask",
+					"when": "view == substrateTasks",
+					"group": "inline@0"
+				},
 				{
 					"command": "substrate.polkadotApps",
 					"when": "view == substrateProcesses && viewItem == theia",

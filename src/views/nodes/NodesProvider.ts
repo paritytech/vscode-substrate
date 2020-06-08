@@ -166,6 +166,5 @@ export function setUpNodesTreeView(nodes: Nodes, processes: any) {
       selectedNodePath$.next((item as any).nodePath || null);
     });
 
-
   return { selectedNode$ };
 }
