@@ -34,7 +34,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
 		resultPanel.webview.postMessage({
 			command: 'tasks',
-			payload: tasks.map((task, i) => ({ id: i, name: task.name }));
+			payload: tasks.map((task, i) => ({ id: i, name: task.name }))
 		});
 
 		resultPanel.webview.onDidReceiveMessage(message => {
