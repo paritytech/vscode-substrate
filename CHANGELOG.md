@@ -1,5 +1,8 @@
 # Changelog
 
+## v0.4.6
+* Workspace tasks (tasks defined by the template) are now listed in a treeview
+
 ## v0.4.5
 * Polkadot Apps link on Substrate Playground
 * Ask user for flags when launching node
