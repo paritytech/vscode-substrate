@@ -1,5 +1,8 @@
 # Changelog
 
+## v0.4.7
+* Playground fix for Workspace tasks.
+
 ## v0.4.6
 * Workspace tasks (tasks defined by the template) are now listed in a treeview
 
