@@ -67,7 +67,7 @@
 				},
 				{
 					"id": "substrateNodes",
-					"name": "Select node",
+					"name": "Nodes",
 					"group": "@2"
 				},
 				{
