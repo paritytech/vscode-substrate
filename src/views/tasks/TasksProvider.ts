@@ -53,9 +53,7 @@ async function quickPickTasks(tasks: vscode.Task[]) {
 }
 
 export async function setupTasksTreeView() {
-    const tasks = (await vscode.tasks.fetchTasks()).filter(t => t.source === 'Workspace');
-    console.log('Tasks', tasks);
-
+    const tasks = (await vscode.tasks.fetchTasks()).filter(t => t.source === 'Workspace' || t.source.startsWith('file:///'));
     const treeDataProvider = new TasksProvider(tasks);
     vscode.window.createTreeView('substrateTasks', { treeDataProvider });
 
