@@ -81,47 +81,74 @@
 			{
 				"command": "substrate.runTask",
 				"title": "Substrate: Execute action",
-				"icon": "resources/runTask.svg"
+				"icon": {
+					"dark": "resources/runTask.svg",
+					"light": "resources/runTask-black.svg"
+				}
 			},
 			{
 				"command": "substrate.stopProcess",
 				"title": "Substrate: Stop process",
-				"icon": "resources/stopProcess.svg"
+				"icon": {
+					"dark": "resources/stopProcess.svg",
+					"light": "resources/stopProcess-black.svg"
+				}
 			},
 			{
 				"command": "substrate.polkadotApps",
 				"title": "Substrate: Polkadot Apps",
-				"icon": "resources/apps.svg"
-			},
-			{
-				"command": "substrate.startNode",
-				"title": "Substrate: Start node",
-				"icon": "resources/startNode.svg"
+				"icon": {
+					"dark": "resources/apps.svg",
+					"light": "resources/apps-black.svg"
+				}
 			},
 			{
 				"command": "substrate.purgeChain",
 				"title": "Substrate: Purge chain",
-				"icon": "resources/purgeChain.svg"
+				"icon": {
+					"dark": "resources/purgeChain.svg",
+					"light": "resources/purgeChain-black.svg"
+				}
+			},
+			{
+				"command": "substrate.startNode",
+				"title": "Substrate: Start node",
+				"icon": {
+					"dark": "resources/startNode.svg",
+					"light": "resources/startNode-black.svg"
+				}
 			},
 			{
 				"command": "substrateMarketplace.palletHomepage",
 				"title": "Homepage",
-				"icon": "resources/home.svg"
+				"icon": {
+					"dark": "resources/home.svg",
+					"light": "resources/home-black.svg"
+				}
 			},
 			{
 				"command": "substrateMarketplace.palletGithub",
 				"title": "GitHub",
-				"icon": "resources/github.svg"
+				"icon": {
+					"dark": "resources/github.svg",
+					"light": "resources/github-black.svg"
+				}
 			},
 			{
 				"command": "substrateMarketplace.palletDocumentation",
 				"title": "Documentation",
-				"icon": "resources/book.svg"
+				"icon": {
+					"dark": "resources/book.svg",
+					"light": "resources/book-black.svg"
+				}
 			},
 			{
 				"command": "substrateMarketplace.installPallet",
 				"title": "Add pallet to runtime",
-				"icon": "resources/add.svg"
+				"icon": {
+					"dark": "resources/add.svg",
+					"light": "resources/add-black.svg"
+				}
 			}
 		],
 		"menus": {
@@ -160,12 +187,12 @@
 					"group": "inline@1"
 				},
 				{
-					"command": "substrate.startNode",
+					"command": "substrate.purgeChain",
 					"when": "view == substrateNodes",
 					"group": "inline@0"
 				},
 				{
-					"command": "substrate.purgeChain",
+					"command": "substrate.startNode",
 					"when": "view == substrateNodes",
 					"group": "inline@1"
 				},
