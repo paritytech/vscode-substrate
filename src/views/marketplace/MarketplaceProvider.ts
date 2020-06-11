@@ -31,7 +31,7 @@ export class TreeDataProvider implements vscode.TreeDataProvider<TreeItem> {
           treeCategory.children?.forEach(treePallet => {
             treePallet.contextValue = node && node.deps && node.deps.includes(treePallet.name)
               ? 'palletInstalled' // TODO work from a single source of truth and have a clear mapping instead (see above comment); pure functions
-              : 'pallet';
+              : node ? 'pallet' : 'palletNoNode';
             treePallet.iconPath = treePallet.contextValue === 'palletInstalled' ? path.join(__filename, '..', '..', '..', '..', 'resources', 'check.svg') : false;
           });
       });
@@ -44,10 +44,6 @@ export class TreeDataProvider implements vscode.TreeDataProvider<TreeItem> {
   }
 
   getChildren(element?: TreeItem | undefined): vscode.ProviderResult<TreeItem[]> {
-    if (this._selectedNode$.getValue() === null) {
-      return [];
-    }
-
     if (element === undefined) {
       return this.treeCategories;
     }
@@ -88,7 +84,7 @@ export class TreePallet extends vscode.TreeItem {
     this.name = name;
     this.description = description;
     this.tooltip = `${name} - ${description}`;
-    this.contextValue = 'pallet';
+    this.contextValue = 'palletNoNode';
     this.github = github;
     this.documentation = documentation;
     this.homepage = homepage;
@@ -103,7 +99,7 @@ export function setUpMarketplaceTreeView(nodes: Nodes, selectedNode$: BehaviorSu
       if (node && node.runtimePath)
         treeView.message = `Runtime: ${tryShortname(node.runtimePath)}`;
       else
-        treeView.message = `Please select a node above.`;
+        treeView.message = `No node selected`;
     });
 
     // Set up commands: documentation, github, homepage

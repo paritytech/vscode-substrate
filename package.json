@@ -32,7 +32,7 @@
 	"contributes": {
 		"viewsWelcome": [
 			{
-				"view": "substrateProcesses",
+				"view": "substrateTasks",
 				"contents": "No actions were found in this workspace."
 			},
 			{
@@ -171,17 +171,17 @@
 				},
 				{
 					"command": "substrateMarketplace.palletHomepage",
-					"when": "view == substrateMarketplace && viewItem == pallet || view == substrateMarketplace && viewItem == palletInstalled",
+					"when": "view == substrateMarketplace && viewItem == pallet || view == substrateMarketplace && viewItem == palletInstalled || view == substrateMarketplace && viewItem == palletNoNode",
 					"group": "inline@0"
 				},
 				{
 					"command": "substrateMarketplace.palletGithub",
-					"when": "view == substrateMarketplace && viewItem == pallet || view == substrateMarketplace && viewItem == palletInstalled",
+					"when": "view == substrateMarketplace && viewItem == pallet || view == substrateMarketplace && viewItem == palletInstalled || view == substrateMarketplace && viewItem == palletNoNode",
 					"group": "inline@1"
 				},
 				{
 					"command": "substrateMarketplace.palletDocumentation",
-					"when": "view == substrateMarketplace && viewItem == pallet || view == substrateMarketplace && viewItem == palletInstalled",
+					"when": "view == substrateMarketplace && viewItem == pallet || view == substrateMarketplace && viewItem == palletInstalled || view == substrateMarketplace && viewItem == palletNoNode",
 					"group": "inline@2"
 				},
 				{
