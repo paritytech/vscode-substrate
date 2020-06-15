@@ -1,5 +1,8 @@
 # Changelog
 
+## v0.4.9
+* Add "Getting started" command
+
 ## v0.4.8
 * Fix icons for light theme
 * Always show marketplace treeview, even when no node is selected
