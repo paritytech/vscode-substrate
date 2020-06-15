@@ -47,7 +47,7 @@ export default class Nodes {
     ).pipe
       (
         map(() => findNodesInWorkspace()),
-        tap(r => console.log('Found nodes',r))
+        // tap(r => console.log('Found nodes',r))
       ); // TODO have a rescan button
 
     this.nodes$ = new BehaviorSubject(<Node[]>[]);
@@ -73,7 +73,7 @@ export default class Nodes {
         } catch (e) { console.error('error',e); return {nodePath: ''} }
         });
       }),
-      tap(r => console.log('Found nodes infos', r))
+      // tap(r => console.log('Found nodes infos', r))
     ).subscribe(this.nodes$);
     this.nodes$.subscribe(x => {});
   }

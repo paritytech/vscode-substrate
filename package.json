@@ -79,6 +79,10 @@
 		},
 		"commands": [
 			{
+				"command": "substrate.gettingStarted",
+				"title": "Substrate: Getting started"
+			},
+			{
 				"command": "substrate.runTask",
 				"title": "Substrate: Execute action",
 				"icon": {
