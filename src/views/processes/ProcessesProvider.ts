@@ -77,6 +77,7 @@ async function quickPickProcesses(_processes: Processes) {
 }
 
 const INSTANCE = process.env.SUBSTRATE_PLAYGROUND_INSTANCE;
+const HOST = process.env.SUBSTRATE_PLAYGROUND_HOSTNAME;
 
 export function setupProcessesTreeView(processes: Processes) {
 
@@ -84,7 +85,7 @@ export function setupProcessesTreeView(processes: Processes) {
       const process = processTreeItem?.process || await quickPickProcesses(processes);
 
       const port = process.command.match(/--ws-port[ =]\d+/)?.[0] || '9944';
-      const wsEndpoint = `wss://${INSTANCE}.playground.substrate.dev${port !== '9944' ? `:${port}` : ''}/wss`;
+      const wsEndpoint = `wss://${INSTANCE}.${HOST}${port !== '9944' ? `:${port}` : ''}/wss`;
       const apps = `https://polkadot.js.org/apps/?rpc=${wsEndpoint}`;
       vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(apps));
     });
