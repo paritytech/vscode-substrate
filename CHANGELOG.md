@@ -1,5 +1,8 @@
 # Changelog
 
+## v0.4.10
+* Playground: Fix ws endpoint for apps
+
 ## v0.4.9
 * Add "Getting started" command
 
