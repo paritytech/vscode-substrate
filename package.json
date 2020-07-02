@@ -36,6 +36,10 @@
 				"contents": "No actions were found in this workspace."
 			},
 			{
+				"view": "substrateAccounts",
+				"contents": "No accounts found."
+			},
+			{
 				"view": "substrateProcesses",
 				"contents": "No node is currently running."
 			},
@@ -74,6 +78,11 @@
 					"id": "substrateMarketplace",
 					"name": "Marketplace",
 					"group": "@3"
+				},
+				{
+					"id": "substrateAccounts",
+					"name": "Accounts",
+					"group": "@4"
 				}
 			]
 		},
@@ -153,6 +162,38 @@
 					"dark": "resources/add.svg",
 					"light": "resources/add-black.svg"
 				}
+			},
+			{
+				"command": "substrate.addAccount",
+				"title": "Substrate: Add account",
+				"icon": {
+					"dark": "resources/add.svg",
+					"light": "resources/add-black.svg"
+				}
+			},
+			{
+				"command": "substrate.createAccount",
+				"title": "Create account"
+			},
+			{
+				"command": "substrate.importAccount",
+				"title": "Import account"
+			},
+			{
+				"command": "substrate.removeAccount",
+				"title": "Remove"
+			},
+			{
+				"command": "substrate.exportAccount",
+				"title": "Export"
+			},
+			{
+				"command": "substrate.renameAccount",
+				"title": "Change name"
+			},
+			{
+				"command": "substrate.copyAddress",
+				"title": "Copy address"
 			}
 		],
 		"menus": {
@@ -172,6 +213,21 @@
 				{
 					"command": "substrateMarketplace.installPallet",
 					"when": "false"
+				}
+			],
+			"view/title": [
+				{
+					"command": "substrate.addAccount",
+					"when": "view == substrateAccounts",
+					"group": "navigation"
+				},
+				{
+					"command": "substrate.createAccount",
+					"when": "view == substrateAccounts"
+				},
+				{
+					"command": "substrate.importAccount",
+					"when": "view == substrateAccounts"
 				}
 			],
 			"view/item/context": [
@@ -219,6 +275,22 @@
 					"command": "substrateMarketplace.installPallet",
 					"when": "view == substrateMarketplace && viewItem == pallet",
 					"group": "inline@3"
+				},
+				{
+					"command": "substrate.removeAccount",
+					"when": "view == substrateAccounts"
+				},
+				{
+					"command": "substrate.exportAccount",
+					"when": "view == substrateAccounts"
+				},
+				{
+					"command": "substrate.renameAccount",
+					"when": "view == substrateAccounts"
+				},
+				{
+					"command": "substrate.copyAddress",
+					"when": "view == substrateAccounts"
 				}
 			]
 		}
@@ -235,9 +307,11 @@
 		"typescript": "^3.5.1"
 	},
 	"dependencies": {
+		"@polkadot/keyring": "^2.16.1",
 		"@types/lodash": "^4.14.149",
 		"@types/node-fetch": "^2.5.5",
 		"array-flat-polyfill": "^1.0.1",
+		"clipboardy": "^2.3.0",
 		"glob": "^7.1.6",
 		"lodash": "^4.17.15",
 		"node-fetch": "^2.6.0",

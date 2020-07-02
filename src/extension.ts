@@ -7,6 +7,7 @@ import Processes from './processes/Processes';
 import { setupProcessesTreeView } from './views/processes/ProcessesProvider';
 import { setupTasksTreeView } from './views/tasks/TasksProvider';
 import { showGettingStarted } from './gettingstarted';
+import { setupAccountsTreeView } from './views/accounts/AccountsProvider';
 
 export async function activate(context: vscode.ExtensionContext) {
 	const nodes = new Nodes();
@@ -20,6 +21,9 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	// Set up processes
 	setupProcessesTreeView(processes);
+
+	// Set up accounts
+	setupAccountsTreeView(context);
 
 	// Set up tasks
 	const tasks = await setupTasksTreeView();
