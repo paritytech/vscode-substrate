@@ -1,114 +1,17 @@
 import * as vscode from 'vscode';
 import { BehaviorSubject, of, combineLatest } from 'rxjs';
-import { tryShortname } from '../../util';
+import { tryShortname, showInputBoxValidate } from '../../util';
 import { switchMap, tap } from 'rxjs/operators';
 import Nodes, {Node} from '../../nodes/Nodes';
 
-import { Keyring } from '@polkadot/keyring';
-import { KeyringPair$Json } from '@polkadot/keyring/types';
-import { KeypairType } from '@polkadot/util-crypto/types';
 import { mnemonicGenerate, randomAsU8a } from '@polkadot/util-crypto';
 import { u8aToHex } from '@polkadot/util';
 
 import * as clipboard from 'clipboardy';
+import { TreeDataProvider } from '../../common/TreeDataProvider';
+import { Substrate } from '../../common/Substrate';
 
 const fs = require('fs');
-
-// ------------------- SUBSTRATE
-
-export class Substrate {
-  private keyring = new Keyring({ type: 'sr25519' });
-
-  constructor(
-    private context: vscode.ExtensionContext
-  ) { }
-
-  getAccounts(): KeyringPair$Json[] {
-    const accounts = this.context.globalState.get<string>('accounts');
-    if (!accounts) {
-      return [];
-    }
-    return JSON.parse(accounts);
-  }
-
-  isAccountExists(name: string): boolean {
-    const result = this.getAccounts();
-    const exKey = result.find((val) => val.meta.name === name);
-    if (!exKey) {
-      return false;
-    }
-    return true;
-  }
-
-  async updateAccounts(accounts: KeyringPair$Json[]) {
-    await this.context.globalState.update('accounts', JSON.stringify(accounts));
-  }
-
-  async createKeyringPair(key: string, name: string, type: KeypairType) {
-    const pair = this.keyring.addFromUri(key, { name }, type);
-    const accounts = this.getAccounts();
-    accounts.push(pair.toJson());
-    await this.updateAccounts(accounts);
-  }
-
-  async createKeyringPairWithPassword(key: string, name: string, type: KeypairType, pass: string) {
-    const pair = this.keyring.addFromUri(key, { name }, type);
-
-    const json = pair.toJson(pass);
-    json.meta.whenEdited = Date.now();
-
-    const accounts = this.getAccounts();
-    accounts.push(json);
-    await this.updateAccounts(accounts);
-  }
-
-  async removeAccount(name: string) {
-    const accounts = this.getAccounts();
-    const index = accounts.findIndex((val) => val.meta['name'] === name);
-    accounts.splice(index, 1);
-    await this.updateAccounts(accounts);
-  }
-
-  async renameAccount(oldName: string, newName: string) {
-    const accounts = this.getAccounts();
-    for (const account of accounts) {
-      if (account.meta['name'] === oldName) {
-        account.meta['name'] = newName;
-        break;
-      }
-    }
-    await this.updateAccounts(accounts);
-  }
-
-  async importKeyringPair(path: string) {
-    const rawdata = fs.readFileSync(path);
-    const pair: KeyringPair$Json = JSON.parse(rawdata.toString());
-    if (this.isAccountExists(pair.meta['name'] as string)) {
-      vscode.window.showWarningMessage('Account with same key already exists. Account not added');
-      return;
-    }
-    const accounts = this.getAccounts();
-    accounts.push(pair);
-    await this.updateAccounts(accounts);
-  }
-}
-
-// ------------------ TREE DATA PROVIDER
-
-export abstract class TreeDataProvider<T> implements vscode.TreeDataProvider<T> {
-  protected _onDidChangeTreeData: vscode.EventEmitter<T | undefined> = new vscode.EventEmitter<T | undefined>();
-  readonly onDidChangeTreeData: vscode.Event<T | undefined> = this._onDidChangeTreeData.event;
-
-  public refresh(): void {
-    this._onDidChangeTreeData.fire();
-  }
-
-  public getTreeItem(element: T): vscode.TreeItem {
-    return element;
-  }
-
-  abstract getChildren(element?: T): Thenable<T[]>;
-}
 
 type Account = any;
 
@@ -141,25 +44,7 @@ export class AccountTreeItem extends vscode.TreeItem {
   }
 }
 
-// ------------------ TREE DATA PROVIDER
-
-async function showInputBoxValidate(options: vscode.InputBoxOptions, validateFn: (x: any) => Promise<string>) {
-  do {
-    const a = await vscode.window.showInputBox(options);
-    if (a === undefined)
-      return a;
-    else {
-      let err = await validateFn(a);
-      if (err !== '')
-        vscode.window.showErrorMessage(err);
-      else
-        return a;
-    }
-  } while (true);
-}
-
-export async function setupAccountsTreeView(context: vscode.ExtensionContext) {
-    const substrate = new Substrate(context)
+export async function setupAccountsTreeView(substrate: Substrate, context: vscode.ExtensionContext) {
     const treeDataProvider = new AccountsProvider(substrate);
     vscode.window.createTreeView('substrateAccounts', { treeDataProvider });
 

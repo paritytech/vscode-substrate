@@ -25,3 +25,18 @@ export function tryShortname(fullPath: string) {
   if (fsPaths.length !== 1) return fullPath;
   return path.relative(fsPaths[0], fullPath);
 }
+
+export async function showInputBoxValidate(options: vscode.InputBoxOptions, validateFn: (x: any) => Promise<string>) {
+  do {
+    const a = await vscode.window.showInputBox(options);
+    if (a === undefined)
+      return a;
+    else {
+      let err = await validateFn(a);
+      if (err !== '')
+        vscode.window.showErrorMessage(err);
+      else
+        return a;
+    }
+  } while (true);
+}

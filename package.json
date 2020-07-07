@@ -83,6 +83,11 @@
 					"id": "substrateAccounts",
 					"name": "Accounts",
 					"group": "@4"
+				},
+				{
+					"id": "substrateContracts",
+					"name": "Contracts",
+					"group": "@5"
 				}
 			]
 		},
@@ -194,6 +199,10 @@
 			{
 				"command": "substrate.copyAddress",
 				"title": "Copy address"
+			},
+			{
+				"command": "substrate.compileAndDeploy",
+				"title": "Compile & deploy contract"
 			}
 		],
 		"menus": {
@@ -291,6 +300,11 @@
 				{
 					"command": "substrate.copyAddress",
 					"when": "view == substrateAccounts"
+				},
+				{
+					"command": "substrate.compileAndDeploy",
+					"when": "view == substrateContracts",
+					"group": "section-1"
 				}
 			]
 		}
@@ -307,6 +321,8 @@
 		"typescript": "^3.5.1"
 	},
 	"dependencies": {
+		"@polkadot/api": "^1.23.1",
+		"@polkadot/api-contract": "^1.23.1",
 		"@polkadot/keyring": "^2.16.1",
 		"@types/lodash": "^4.14.149",
 		"@types/node-fetch": "^2.5.5",
