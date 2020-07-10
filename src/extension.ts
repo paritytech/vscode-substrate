@@ -12,6 +12,8 @@ import { Substrate } from './common/Substrate';
 import { setupContractsTreeView } from './views/contracts/ContractsProvider';
 
 export async function activate(context: vscode.ExtensionContext) {
+	const substrate = new Substrate(context)
+
 	const nodes = new Nodes();
 	const processes = new Processes();
 
@@ -22,14 +24,13 @@ export async function activate(context: vscode.ExtensionContext) {
 	setUpMarketplaceTreeView(nodes, selectedNode$);
 
 	// Set up processes
-	setupProcessesTreeView(processes);
+	const selectedProcess$ = setupProcessesTreeView(substrate, processes);
 
 	// Set up accounts
-	const substrate = new Substrate(context)
 	setupAccountsTreeView(substrate, context);
 
 	// Set up contracts
-	setupContractsTreeView(substrate, context);
+	setupContractsTreeView(substrate, selectedProcess$, context);
 
 	// Set up tasks
 	const tasks = await setupTasksTreeView();

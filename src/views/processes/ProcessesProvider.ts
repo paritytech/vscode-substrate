@@ -1,9 +1,10 @@
 import * as vscode from 'vscode';
 import { BehaviorSubject, of, combineLatest } from 'rxjs';
-import { tryShortname } from '../../util';
-import { switchMap, tap } from 'rxjs/operators';
+import { tryShortname, wsEndpointFromCommand } from '../../util';
+import { switchMap, tap, distinctUntilChanged } from 'rxjs/operators';
 import Nodes, {Node} from '../../nodes/Nodes';
 import Processes, { Process } from '../../processes/Processes';
+import { Substrate } from '../../common/Substrate';
 
 export class ProcessesProvider implements vscode.TreeDataProvider<ProcessTreeItem> {
   ProcessTreeItems: ProcessTreeItem[] = [];
@@ -79,7 +80,7 @@ async function quickPickProcesses(_processes: Processes) {
 const INSTANCE = process.env.SUBSTRATE_PLAYGROUND_INSTANCE;
 const HOST = process.env.SUBSTRATE_PLAYGROUND_HOSTNAME;
 
-export function setupProcessesTreeView(processes: Processes) {
+export function setupProcessesTreeView(substrate: Substrate, processes: Processes) {
 
     vscode.commands.registerCommand("substrate.polkadotApps", async (processTreeItem?: ProcessTreeItem) => {
       const process = processTreeItem?.process || await quickPickProcesses(processes);
@@ -90,8 +91,10 @@ export function setupProcessesTreeView(processes: Processes) {
       vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(apps));
     });
 
+    const selectedProcess$ = new BehaviorSubject<Process | null>(null);
     vscode.commands.registerCommand("substrate.selectProcess", async (processTreeItem: ProcessTreeItem) => {
       processTreeItem.process.term.show();
+      selectedProcess$.next((processTreeItem as any).process || null);
     });
 
     vscode.commands.registerCommand("substrate.stopProcess", async (processTreeItem?: ProcessTreeItem) => {
@@ -109,5 +112,20 @@ export function setupProcessesTreeView(processes: Processes) {
         treeView.message = `No node is currently running.`;
       else
         treeView.message = undefined;
+
+      if (!processes.find(process => process === selectedProcess$.getValue()))
+        selectedProcess$.next(null);
+
+
     });
+
+    selectedProcess$.pipe(distinctUntilChanged()).subscribe(process => {
+      if (!process)
+        substrate.disconnect();
+      else {
+        substrate.connectTo(wsEndpointFromCommand(process.command));
+      }
+    });
+
+    return selectedProcess$;
 }

@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import { Keyring } from '@polkadot/keyring';
 import { KeyringPair$Json } from '@polkadot/keyring/types';
 import { KeypairType } from '@polkadot/util-crypto/types';
-import { ApiPromise } from '@polkadot/api';
+import { ApiPromise, WsProvider } from '@polkadot/api';
 import { Abi } from '@polkadot/api-contract';
 
 const fs = require('fs');
@@ -22,6 +22,19 @@ export class Substrate {
   constructor(
     private context: vscode.ExtensionContext
   ) { }
+
+  async connectTo(wsEndpoint: string) {
+    const api = new ApiPromise({provider: new WsProvider(wsEndpoint)});
+    await api.isReady;
+    this.api = api;
+  }
+
+  async disconnect() {
+    if (this.api) {
+      this.api!.disconnect();
+    }
+    this.api = undefined;
+  }
 
   getAccounts(): KeyringPair$Json[] {
     const accounts = this.context.globalState.get<string>('accounts');

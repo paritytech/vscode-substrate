@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { BehaviorSubject, of, combineLatest } from 'rxjs';
-import { tryShortname, resolveWhenTerminalClosed, showInputBoxValidate } from '../../util';
+import { tryShortname, resolveWhenTerminalClosed, showInputBoxValidate, wsEndpointFromCommand } from '../../util';
 import { switchMap, tap } from 'rxjs/operators';
 import Nodes, { Node } from '../../nodes/Nodes';
 import { ApiPromise, WsProvider } from '@polkadot/api';
@@ -13,6 +13,7 @@ import { compactAddLength } from '@polkadot/util';
 import * as clipboard from 'clipboardy';
 import { TreeDataProvider } from '../../common/TreeDataProvider';
 import { Substrate } from '../../common/Substrate';
+import { Process } from '../../processes/Processes';
 
 const fs = require('fs');
 const path = require('path');
@@ -49,25 +50,44 @@ export class ContractTreeItem extends vscode.TreeItem {
   }
 }
 
-export async function setupContractsTreeView(substrate: Substrate, context: vscode.ExtensionContext) {
+export async function setupContractsTreeView(substrate: Substrate, selectedProcess$: any, context: vscode.ExtensionContext) {
   const treeDataProvider = new ContractsProvider(substrate);
-  vscode.window.createTreeView('substrateContracts', { treeDataProvider });
+  const treeView = vscode.window.createTreeView('substrateContracts', { treeDataProvider });
+
+  selectedProcess$.subscribe((process: Process) => {
+    if (process)
+      treeView.message = `Connected to: ${wsEndpointFromCommand(process.command)} (${tryShortname(process.nodePath) + ' • ' + process.command})`;
+    else
+      treeView.message = `Not connected to any node.`;
+  });
 
   vscode.commands.registerCommand("substrate.compileAndDeploy", async () => {
-    const folder = await vscode.window.showOpenDialog({canSelectFiles: false, canSelectFolders: true, canSelectMany: false, openLabel: 'Select contract folder'})
-    if (folder === undefined) return;
+try{
+    const api = substrate.getConnection();
+    if (!api) {
+      vscode.window.showErrorMessage('Please connect to a node first.');
+      return;
+    }
 
-    const term = vscode.window.createTerminal({name: 'Compiling contract', cwd: folder[0]});
+    const folders = await vscode.window.showOpenDialog({canSelectFiles: false, canSelectFolders: true, canSelectMany: false, openLabel: 'Select contract folder'})
+    if (folders === undefined) return;
+
+    const term = vscode.window.createTerminal({name: 'Compiling contract', cwd: folders[0]});
     term.sendText('cargo +nightly contract build && cargo +nightly contract generate-metadata && exit');
     term.show();
 
+    console.log('await');
     await resolveWhenTerminalClosed(term);
+    console.log('OK ay ay');
 
-    const wasmPath = path.join(folder, 'target', path.basename(folder) + '.wasm');
-    const abiPath = path.join(folder, 'target', 'metadata.json');
+    const wasmPath = path.join(folders[0].fsPath, 'target', path.basename(folders[0].fsPath) + '.wasm');
+    const abiPath = path.join(folders[0].fsPath, 'target', 'metadata.json');
+    console.log('eyyy');
+    console.log(wasmPath, abiPath);
     const wasm: Uint8Array = await fs.promises.readFile(wasmPath);
     const isWasmValid = wasm.subarray(0, 4).join(',') === '0,97,115,109'; // '\0asm'
     if (!isWasmValid) {
+      console.error('Invalid code');
       throw Error('Invalid code');
     }
     const compiledContract = compactAddLength(wasm);
@@ -114,8 +134,12 @@ export async function setupContractsTreeView(substrate: Substrate, context: vsco
       password: true,
       value: '',
     }, async (value: any) => {
-      account.decodePkcs8(value);
-      if (account.isLocked) {
+      try {
+        account.decodePkcs8(value);
+        if (account.isLocked) {
+          return 'Failed to decode account';
+        }
+      } catch (e) {
         return 'Failed to decode account';
       }
       return '';
@@ -124,11 +148,10 @@ export async function setupContractsTreeView(substrate: Substrate, context: vsco
 
     const abiBytes: Uint8Array = await fs.promises.readFile(abiPath);
     const abiJson = JSON.parse(abiBytes.toString());
-    const api = await ApiPromise.create({ provider: new WsProvider('???') }); // TODO
     const abi = new Abi(api.registry, abiJson);
 
     const constructors = abi.abi.contract.constructors;
-    const _constructor = await vscode.window.showQuickPick(constructors.map((x: any) => x.name));
+    const _constructor = await vscode.window.showQuickPick(constructors.map((x: any) => x.name), {placeHolder: 'Choose constructor'});
     if (!_constructor) return;
     const constructorI = constructors.findIndex(x => x.name === _constructor)!;
     const constructor = constructors.find(x => x.name === _constructor)!;
@@ -137,7 +160,7 @@ export async function setupContractsTreeView(substrate: Substrate, context: vsco
     const argd: any[] = [];
     while (args.length > argd.length) {
       const i = argd.length;
-      const prompt = `${args[i].name}: ${args[i].type}`;
+      const prompt = `${args[i].name}: ${args[i].type.displayName}`;
 
       argd.push(await showInputBoxValidate({
         ignoreFocusOut: true,
@@ -182,13 +205,9 @@ export async function setupContractsTreeView(substrate: Substrate, context: vsco
     const log = (...a: any[]) => console.log(...a);
 
     try {
-      const con = substrate.getConnection();
-      if (!con) {
-        log('Not connected to a node', 'error', true);
-        return;
-      }
-      const nonce = await con.query.system.accountNonce(account.address);
-      const contractApi = con.tx.contracts ? con.tx['contracts'] : con.tx['contract'];
+      const { nonce } = await api.query.system.account(account.address);
+      const contractApi = api.tx.contracts ? api.tx['contracts'] : api.tx['contract'];
+      console.log('contractApi is ', contractApi); // TODO NEXT: contractApi is not defined
       const unsignedTransaction = contractApi.putCode(maxGasUpload, compiledContract);
 
       let code_hash = '';
@@ -232,8 +251,8 @@ export async function setupContractsTreeView(substrate: Substrate, context: vsco
 
       // DEPLOY CONTRACT
       try {
-        const nonce = await con.query.system.accountNonce(account.address);
-        const contractApi = con.tx.contracts ? con.tx['contracts'] : con.tx['contract'];
+        const nonce = await api.query.system.accountNonce(account.address);
+        const contractApi = api.tx.contracts ? api.tx['contracts'] : api.tx['contract'];
         const unsignedTransaction = contractApi.create(
           endowment,
           maxGasDeployment,
@@ -283,6 +302,8 @@ export async function setupContractsTreeView(substrate: Substrate, context: vsco
     } catch (err) {
       log(`Error on put code: ${err.message}`, 'error', true);
     }
-
+  } catch (surerr) {
+    console.error('SURERR',surerr);
+  }
   });
 }

@@ -40,3 +40,12 @@ export async function showInputBoxValidate(options: vscode.InputBoxOptions, vali
     }
   } while (true);
 }
+
+const INSTANCE = process.env.SUBSTRATE_PLAYGROUND_INSTANCE;
+const HOST = process.env.SUBSTRATE_PLAYGROUND_HOSTNAME;
+
+export function wsEndpointFromCommand(command: string) {
+  const port = command.match(/--ws-port[ =]\d+/)?.[0] || '9944';
+  const wsEndpoint = INSTANCE ? `wss://${INSTANCE}.${HOST}${port !== '9944' ? `:${port}` : ''}/wss` : `ws://127.0.0.1:${port}/`;
+  return wsEndpoint;
+}
