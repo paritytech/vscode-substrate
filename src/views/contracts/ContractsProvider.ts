@@ -68,6 +68,10 @@ try{
       vscode.window.showErrorMessage('Please connect to a node first.');
       return;
     }
+    if (!api.tx.contracts && !api.tx.contract) {
+      vscode.window.showErrorMessage('The selected process doesn\'t support smart contracts.');
+      return;
+    }
 
     const folders = await vscode.window.showOpenDialog({canSelectFiles: false, canSelectFolders: true, canSelectMany: false, openLabel: 'Select contract folder'})
     if (folders === undefined) return;
@@ -76,13 +80,10 @@ try{
     term.sendText('cargo +nightly contract build && cargo +nightly contract generate-metadata && exit');
     term.show();
 
-    console.log('await');
     await resolveWhenTerminalClosed(term);
-    console.log('OK ay ay');
 
     const wasmPath = path.join(folders[0].fsPath, 'target', path.basename(folders[0].fsPath) + '.wasm');
     const abiPath = path.join(folders[0].fsPath, 'target', 'metadata.json');
-    console.log('eyyy');
     console.log(wasmPath, abiPath);
     const wasm: Uint8Array = await fs.promises.readFile(wasmPath);
     const isWasmValid = wasm.subarray(0, 4).join(',') === '0,97,115,109'; // '\0asm'
@@ -103,21 +104,6 @@ try{
       return '';
     });
     if (!name) return;
-
-    const maxGasUpload: string | undefined = await showInputBoxValidate({
-      ignoreFocusOut: true,
-      prompt: 'The maximum amount of gas that can be used for the upload',
-      placeHolder: 'ex. 100000'
-    }, async (value: any) => {
-        if (!value || !value.trim()) {
-          return 'A value is required';
-        }
-        if (!value.match(/^-{0,1}\d+$/)) {
-          return 'The maximum gas specified is not a number';
-        }
-      return '';
-    });
-    if (!maxGasUpload) return;
 
     const accounts = substrate.getAccounts();
     const _account = await vscode.window.showQuickPick(substrate.getAccounts().map((x: any) => x.meta.name));
@@ -208,7 +194,7 @@ try{
       const { nonce } = await api.query.system.account(account.address);
       const contractApi = api.tx.contracts ? api.tx['contracts'] : api.tx['contract'];
       console.log('contractApi is ', contractApi); // TODO NEXT: contractApi is not defined
-      const unsignedTransaction = contractApi.putCode(maxGasUpload, compiledContract);
+      const unsignedTransaction = contractApi.putCode(compiledContract);
 
       let code_hash = '';
       await unsignedTransaction.sign(account, { nonce: nonce as any }).send(({ events = [], status }: any) => {
@@ -234,7 +220,7 @@ try{
           });
           if (error !== '') {
             // Todo: Get error
-            log(`Failed on block "${finalized}" with error: ${error}`, 'error', true);
+            vscode.window.showErrorMessage(`Failed on block "${finalized}" with error: ${error}`);
             return;
           }
           if (resultHash === '') {
@@ -251,9 +237,9 @@ try{
 
       // DEPLOY CONTRACT
       try {
-        const nonce = await api.query.system.accountNonce(account.address);
+        const {nonce} = await api.query.system.account(account.address);
         const contractApi = api.tx.contracts ? api.tx['contracts'] : api.tx['contract'];
-        const unsignedTransaction = contractApi.create(
+        const unsignedTransaction = contractApi.instantiate(
           endowment,
           maxGasDeployment,
           code_hash,
@@ -282,28 +268,27 @@ try{
               log(res, 'info', false);
             });
             if (error !== '') {
-              // Todo: Get error
-              log(`Failed on block "${finalized}" with error: ${error}`, 'error', true);
+              vscode.window.showErrorMessage(`Failed on block "${finalized}" with error: ${error}`);
               return;
             }
             if (resultHash === '') {
-              log(`Completed on block "${finalized}" but failed to get event result`, 'info', true);
+              vscode.window.showInformationMessage(`Completed on block "${finalized}" but failed to get event result`);
               return;
             }
             substrate.saveContract(name, resultHash, abi).catch(err => {
-              log(`Failed to store contract: ${err.message}`, 'error', true);
+              vscode.window.showErrorMessage(`Failed to store contract: ${err.message}`);
             });
-            log(`Completed on block ${finalized} with code hash ${resultHash}`, 'info', true);
+            vscode.window.showInformationMessage(`Completed on block ${finalized} with code hash ${resultHash}`);
           }
         });
       } catch (err) {
-        log(`Error on deploy ccontract: ${err.message}`, 'error', true);
+        vscode.window.showErrorMessage(`Error on deploy contract: ${err.message}`);
       }
     } catch (err) {
-      log(`Error on put code: ${err.message}`, 'error', true);
+      vscode.window.showErrorMessage(`Error on put code: ${err.message}`);
     }
   } catch (surerr) {
-    console.error('SURERR',surerr);
+    vscode.window.showErrorMessage(surerr);
   }
   });
 }

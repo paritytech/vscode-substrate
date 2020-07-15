@@ -5,7 +5,7 @@ export type Process = {nodePath: string; term: vscode.Terminal; command: string;
 
 export default class Processes {
 
-  processes$: BehaviorSubject<Process[]> = new BehaviorSubject([] as Process[]);
+  processes$: BehaviorSubject<Process[]> = new BehaviorSubject([{nodePath: '', term: {} as any, command: 'substrate --dev', termCloseHandlerDispose: () => {}}] as Process[]);
 
   new(process: Process) {
     this.processes$.next(this.processes$.getValue().concat([process]));
