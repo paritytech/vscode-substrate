@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.4.11
+* "Purge chain" will run the binary directly (instead of potentially recompiling); same for "Start node".
+* Add command "Compile & start node" that behaves like "Start node" previously, i.e. using "cargo run".
+
 ## v0.4.10
 * Playground: Fix ws endpoint for apps
 
