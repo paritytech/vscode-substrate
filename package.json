@@ -123,6 +123,14 @@
 				}
 			},
 			{
+				"command": "substrate.compileStartNode",
+				"title": "Substrate: Compile & start node",
+				"icon": {
+					"dark": "resources/compileStartNode.svg",
+					"light": "resources/compileStartNode-black.svg"
+				}
+			},
+			{
 				"command": "substrateMarketplace.palletHomepage",
 				"title": "Homepage",
 				"icon": {
@@ -199,6 +207,11 @@
 					"command": "substrate.startNode",
 					"when": "view == substrateNodes",
 					"group": "inline@1"
+				},
+				{
+					"command": "substrate.compileStartNode",
+					"when": "view == substrateNodes",
+					"group": "inline@2"
 				},
 				{
 					"command": "substrateMarketplace.palletHomepage",

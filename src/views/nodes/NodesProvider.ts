@@ -4,6 +4,9 @@ import { tryShortname } from '../../util';
 import { switchMap, tap } from 'rxjs/operators';
 import Nodes, {Node} from '../../nodes/Nodes';
 
+const path = require('path');
+const fs = require('fs');
+
 export class NodesProvider implements vscode.TreeDataProvider<NodeTreeItem> {
   nodeTreeItems: NodeTreeItem[] = [];
 
@@ -100,16 +103,24 @@ async function quickPickNodePath(nodes: Nodes) {
   return nodePaths[nodesReadable.findIndex(x => x === pick)];
 }
 
+function getCargoName(directory: string) {
+  const toml = fs.readFileSync(path.join(directory,'Cargo.toml')).toString();
+  return toml.match(/name ?= ?'(.+)'/)[1];
+}
+
+function getWorkspaceRoot(directory: string) {
+  let currDir = directory;
+  do {
+    if (fs.existsSync(path.join(currDir, 'Cargo.lock')))
+      return currDir;
+    currDir = path.join(currDir, '..');
+  } while (currDir.split(path.sep).length > 0)
+  throw new Error('No workspace root was found');
+}
 
 export function setUpNodesTreeView(nodes: Nodes, processes: any) {
 
-    // vscode.commands.registerCommand("substrate.compileNode", async (nodePath?: string) => {
-    //   const term = vscode.window.createTerminal({ name: 'Compile node', cwd: nodePath || await quickPickNodePath(nodes) });
-    //   term.sendText('cargo build --release');
-    //   term.show();
-    // });
-
-    vscode.commands.registerCommand("substrate.startNode", async (nodePathLike?: string | NodeTreeItem, _flags?: string | string[]) => {
+    vscode.commands.registerCommand("substrate.startNode", async (nodePathLike?: string | NodeTreeItem, _flags?: string | string[], options: any = {compile: false}) => {
       let nodePath = nodePathLike instanceof NodeTreeItem ? nodePathLike.nodePath : nodePathLike;
       if (nodePath) {
         selectedNodePath$.next(nodePath); // select the item we launch the command on
@@ -127,10 +138,18 @@ export function setUpNodesTreeView(nodes: Nodes, processes: any) {
       // todo use ws port to use polkadot apps
       // does it make sense to have two different polkadot apps endpoints ? two processes, one polkadot app endpoint ?
 
-      term.sendText(`cargo run --release -- ${flags}`);
+      if (options.compile) {
+        term.sendText(`cargo run --release -- ${flags}`);
+      } else {
+        term.sendText(path.join(getWorkspaceRoot(defNodePath),`target/release/${getCargoName(defNodePath)}`) + ' ' + flags);
+      }
       term.show();
 
       processes.new({nodePath: defNodePath, command: flags, term: term});
+    });
+
+    vscode.commands.registerCommand("substrate.compileStartNode", async (nodePathLike?: string | NodeTreeItem, _flags?: string | string[]) => {
+      vscode.commands.executeCommand("substrate.startNode", nodePathLike, _flags, {compile: true});
     });
 
     vscode.commands.registerCommand("substrate.purgeChain", async (nodePathLike?: string | NodeTreeItem) => {
@@ -138,8 +157,10 @@ export function setUpNodesTreeView(nodes: Nodes, processes: any) {
       if (nodePath) {
         selectedNodePath$.next(nodePath); // select the item we launch the command on
       }
-      const term = vscode.window.createTerminal({ name: 'Purge chain', cwd: nodePath || await quickPickNodePath(nodes) });
-      term.sendText('cargo run -- purge-chain --dev');
+      const defoNodePath = nodePath || await quickPickNodePath(nodes);
+      const term = vscode.window.createTerminal({ name: 'Purge chain', cwd: defoNodePath });
+
+      term.sendText(path.join(getWorkspaceRoot(defoNodePath), `target/release/${getCargoName(defoNodePath)}`) + ' purge-chain --dev'); // TODO s
       term.show();
     });
 
