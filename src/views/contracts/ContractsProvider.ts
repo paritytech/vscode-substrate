@@ -7,7 +7,7 @@ import { ApiPromise, WsProvider } from '@polkadot/api';
 
 import { Abi } from '@polkadot/api-contract';
 import { mnemonicGenerate, randomAsU8a } from '@polkadot/util-crypto';
-import { u8aToHex } from '@polkadot/util';
+import { u8aToHex, hexToU8a } from '@polkadot/util';
 import { compactAddLength } from '@polkadot/util';
 
 import * as clipboard from 'clipboardy';
@@ -50,6 +50,19 @@ export class ContractTreeItem extends vscode.TreeItem {
   }
 }
 
+const log = (...a: any[]) => console.log(...a);
+const logError = (s: string) => {
+  console.error(s);
+  vscode.window.showErrorMessage(s);
+}
+function wait(t: number) {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      resolve();
+    },t);
+  });
+}
+
 export async function setupContractsTreeView(substrate: Substrate, selectedProcess$: any, context: vscode.ExtensionContext) {
   const treeDataProvider = new ContractsProvider(substrate);
   const treeView = vscode.window.createTreeView('substrateContracts', { treeDataProvider });
@@ -73,14 +86,19 @@ try{
       return;
     }
 
-    const folders = await vscode.window.showOpenDialog({canSelectFiles: false, canSelectFolders: true, canSelectMany: false, openLabel: 'Select contract folder'})
-    if (folders === undefined) return;
 
-    const term = vscode.window.createTerminal({name: 'Compiling contract', cwd: folders[0]});
-    term.sendText('cargo +nightly contract build && cargo +nightly contract generate-metadata && exit');
-    term.show();
 
-    await resolveWhenTerminalClosed(term);
+    const folders=[{fsPath: '/home/xenya/git/flipper'}];
+
+    // const folders = await vscode.window.showOpenDialog({canSelectFiles: false, canSelectFolders: true, canSelectMany: false, openLabel: 'Select contract folder'})
+    // if (folders === undefined) return;
+
+    // const term = vscode.window.createTerminal({name: 'Compiling contract', cwd: folders[0]});
+    // term.sendText('cargo +nightly contract build && cargo +nightly contract generate-metadata && exit');
+    // term.show();
+
+    // await resolveWhenTerminalClosed(term);
+    // TODO UNCOMMENT
 
     const wasmPath = path.join(folders[0].fsPath, 'target', path.basename(folders[0].fsPath) + '.wasm');
     const abiPath = path.join(folders[0].fsPath, 'target', 'metadata.json');
@@ -96,7 +114,8 @@ try{
     const name: string | undefined = await showInputBoxValidate({
       ignoreFocusOut: true,
       prompt: 'Contract name',
-      placeHolder: 'ex. Flipper contract'
+      placeHolder: 'ex. Flipper contract',
+      value: 'flip'
     }, async (value: any) => {
       if (!value || !value.trim()) {
         return 'A name is required';
@@ -143,22 +162,24 @@ try{
     const constructor = constructors.find(x => x.name === _constructor)!;
     const args = constructor.args
 
-    const argd: any[] = [];
-    while (args.length > argd.length) {
-      const i = argd.length;
+    const constructorParams: any[] = [];
+    while (args.length > constructorParams.length) {
+      const i = constructorParams.length;
       const prompt = `${args[i].name}: ${args[i].type.displayName}`;
 
-      argd.push(await showInputBoxValidate({
+      constructorParams.push(await showInputBoxValidate({
         ignoreFocusOut: true,
         prompt
       }, async (value: any) => {
           return ''
       }));
     }
+    console.log('constructorParams is',constructorParams);
 
     const endowment: string | undefined = await showInputBoxValidate({
       ignoreFocusOut: true,
-      prompt: 'The allotted endowment for this contract, i.e. the amount transferred to the contract upon instantiation',
+      prompt: 'The allotted endowment for this contract, i.e. the amount transferred to the contract upon instantiation.',
+      value: '1000000000000000',
       placeHolder: 'ex. 1000000000000000'
     }, async (value: any) => {
         if (!value || !value.trim()) {
@@ -174,7 +195,8 @@ try{
     const maxGasDeployment: string | undefined = await showInputBoxValidate({
       ignoreFocusOut: true,
       prompt: 'The maximum amount of gas that can be used for the deployment',
-      placeHolder: 'ex. 100000'
+      value: '1000000000000',
+      placeHolder: 'ex. 1000000000000'
     }, async (value: any) => {
       if (!value || !value.trim()) {
         return 'A value is required';
@@ -188,16 +210,15 @@ try{
 
     // PUT CODE
 
-    const log = (...a: any[]) => console.log(...a);
-
     try {
       const { nonce } = await api.query.system.account(account.address);
       const contractApi = api.tx.contracts ? api.tx['contracts'] : api.tx['contract'];
-      console.log('contractApi is ', contractApi); // TODO NEXT: contractApi is not defined
+      console.log('Nonce iss', nonce);
       const unsignedTransaction = contractApi.putCode(compiledContract);
 
       let code_hash = '';
-      await unsignedTransaction.sign(account, { nonce: nonce as any }).send(({ events = [], status }: any) => {
+      console.log('Putting code.');
+      unsignedTransaction.sign(account, { nonce: nonce as any }).send(async ({ events = [], status }: any) => {
         if (status.isFinalized) {
           const finalized = status.asFinalized.toHex();
           log(`Completed at block hash: ${finalized}`, 'info', false);
@@ -220,7 +241,8 @@ try{
           });
           if (error !== '') {
             // Todo: Get error
-            vscode.window.showErrorMessage(`Failed on block "${finalized}" with error: ${error}`);
+            console.log('error',error);
+            logError(`Failed on block "${finalized}" with error: ${error}`);
             return;
           }
           if (resultHash === '') {
@@ -232,63 +254,74 @@ try{
           // });
           log(`Completed on block ${finalized} with code hash ${resultHash}`, 'info', true);
           code_hash = resultHash;
+
+          // Deploying contract
+
+          console.log('Deploying contract');
+          // DEPLOY CONTRACT
+          try {
+            const { nonce } = await api.query.system.account(account.address);
+            console.log('Nonce is', nonce);
+            const unsignedTransaction = contractApi.instantiate(
+              endowment, // +3 more 0's
+              maxGasDeployment,
+              code_hash,
+              '0x0222ff18'
+              // abi.constructors[constructorI](...constructorParams), // should be 0x5ebd88d600
+            );
+            console.log('endowmentt', endowment, 'maxGasDeployment', maxGasDeployment, 'code_hash', code_hash, 'data', abi.constructors[constructorI](...constructorParams));
+            console.log('constructorI',constructorI,'constructorParams',constructorParams);
+            console.log('bytess (unprefixedd)', abi.constructors[constructorI](...constructorParams), u8aToHex(abi.constructors[constructorI](...constructorParams), undefined, false));
+
+            await unsignedTransaction.sign(account, { nonce: nonce as any }).send(({ events = [], status }: any) => {
+              if (status.isFinalized) {
+                const finalized = status.asFinalized.toHex();
+                log(`Completed at block hash: ${finalized}`, 'info', false);
+
+                log('Events:', 'info', false);
+                let error: string = '';
+                let resultHash: string = '';
+                events.forEach(({ phase, event: { data, method, section } }: any) => {
+                  const res = `\t ${phase.toString()} : ${section}.${method} ${data.toString()}`;
+                  if (res.indexOf('Failed') !== -1) {
+                    error += res;
+                  }
+                  if (res.indexOf('indices.NewAccountIndex') !== -1) {
+                    resultHash = res.substring(
+                      res.lastIndexOf('["') + 2,
+                      res.lastIndexOf('",'),
+                    );
+                  }
+                  log(res, 'info', false);
+                });
+                if (error !== '') {
+                  console.log('errorx', error);
+                  logError(`Failed on block "${finalized}" with error: ${error}`);
+                  return;
+                }
+                if (resultHash === '') {
+                  vscode.window.showInformationMessage(`Completed on block "${finalized}" but failed to get event result`);
+                  return;
+                }
+                substrate.saveContract(name, resultHash, abi).catch(err => {
+                  logError(`Failed to store contract: ${err.message}`);
+                });
+                vscode.window.showInformationMessage(`Completed on block ${finalized} with code hash ${resultHash}`);
+
+                // NEXT UP
+                // {"ApplyExtrinsic":2} : system.ExtrinsicFailed [{"Other":null},{"weight":100000,"class":"Normal","paysFee":"Yes"}]
+              }
+            });
+          } catch (err) {
+            logError(`Error on deploy contract: ${err.message}`);
+          }
         }
       });
-
-      // DEPLOY CONTRACT
-      try {
-        const {nonce} = await api.query.system.account(account.address);
-        const contractApi = api.tx.contracts ? api.tx['contracts'] : api.tx['contract'];
-        const unsignedTransaction = contractApi.instantiate(
-          endowment,
-          maxGasDeployment,
-          code_hash,
-          abi.constructors[constructorI](...Object.values(argd)),
-        );
-
-        await unsignedTransaction.sign(account, { nonce: nonce as any }).send(({ events = [], status }: any) => {
-          if (status.isFinalized) {
-            const finalized = status.asFinalized.toHex();
-            log(`Completed at block hash: ${finalized}`, 'info', false);
-
-            log('Events:', 'info', false);
-            let error: string = '';
-            let resultHash: string = '';
-            events.forEach(({ phase, event: { data, method, section } }: any) => {
-              const res = `\t ${phase.toString()} : ${section}.${method} ${data.toString()}`;
-              if (res.indexOf('Failed') !== -1) {
-                error += res;
-              }
-              if (res.indexOf('indices.NewAccountIndex') !== -1) {
-                resultHash = res.substring(
-                  res.lastIndexOf('["') + 2,
-                  res.lastIndexOf('",'),
-                );
-              }
-              log(res, 'info', false);
-            });
-            if (error !== '') {
-              vscode.window.showErrorMessage(`Failed on block "${finalized}" with error: ${error}`);
-              return;
-            }
-            if (resultHash === '') {
-              vscode.window.showInformationMessage(`Completed on block "${finalized}" but failed to get event result`);
-              return;
-            }
-            substrate.saveContract(name, resultHash, abi).catch(err => {
-              vscode.window.showErrorMessage(`Failed to store contract: ${err.message}`);
-            });
-            vscode.window.showInformationMessage(`Completed on block ${finalized} with code hash ${resultHash}`);
-          }
-        });
-      } catch (err) {
-        vscode.window.showErrorMessage(`Error on deploy contract: ${err.message}`);
-      }
     } catch (err) {
-      vscode.window.showErrorMessage(`Error on put code: ${err.message}`);
+      logError(`Error on put code: ${err.message}`);
     }
   } catch (surerr) {
-    vscode.window.showErrorMessage(surerr);
+    logError(surerr);
   }
   });
 }

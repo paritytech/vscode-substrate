@@ -139,7 +139,7 @@ export function setUpNodesTreeView(nodes: Nodes, processes: any) {
         selectedNodePath$.next(nodePath); // select the item we launch the command on
       }
       const term = vscode.window.createTerminal({ name: 'Purge chain', cwd: nodePath || await quickPickNodePath(nodes) });
-      term.sendText('cargo run -- purge-chain --dev');
+      term.sendText('cargo run --release -- purge-chain --dev');
       term.show();
     });
 
