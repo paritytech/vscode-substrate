@@ -203,6 +203,22 @@
 			{
 				"command": "substrate.compileAndDeploy",
 				"title": "Compile & deploy contract"
+			},
+			{
+				"command": "substrate.forgetContract",
+				"title": "Forget contract"
+			},
+			{
+				"command": "substrate.copyContractHash",
+				"title": "Copy hash"
+			},
+			{
+				"command": "substrate.callContractMethod",
+				"title": "Call a contract method"
+			},
+			{
+				"command": "substrate.refreshContracts",
+				"title": "Refresh contracts list"
 			}
 		],
 		"menus": {
@@ -305,6 +321,21 @@
 				{
 					"command": "substrate.copyAddress",
 					"when": "view == substrateAccounts"
+				},
+				{
+					"command": "substrate.callContractMethod",
+					"when": "view == substrateContracts",
+					"group": "section-1"
+				},
+				{
+					"command": "substrate.copyContractHash",
+					"when": "view == substrateContracts",
+					"group": "section-1"
+				},
+				{
+					"command": "substrate.forgetContract",
+					"when": "view == substrateContracts",
+					"group": "section-2"
 				}
 			]
 		}

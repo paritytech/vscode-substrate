@@ -14,6 +14,7 @@ export type ContractInfo = { name: string, address: string, abi: Abi };
 export class Substrate {
   private keyring = new Keyring({ type: 'sr25519' });
   private api?: ApiPromise;
+  private wsEndpoint?: string;
 
   getConnection(): ApiPromise | undefined {
     return this.api;
@@ -24,6 +25,7 @@ export class Substrate {
   ) { }
 
   async connectTo(wsEndpoint: string) {
+    this.wsEndpoint = wsEndpoint;
     const api = new ApiPromise({provider: new WsProvider(wsEndpoint)});
     await api.isReady;
     this.api = api;
@@ -33,6 +35,7 @@ export class Substrate {
     if (this.api) {
       this.api!.disconnect();
     }
+    this.wsEndpoint = undefined;
     this.api = undefined;
   }
 
@@ -110,21 +113,25 @@ export class Substrate {
   }
 
   getConnectionContracts() : any[] {
+    if (!this.wsEndpoint) return [];
     const contractCodes = this.getContracts();
-    const nodeContractCodes = contractCodes[0] || []; // TODO LATER SHOULD BE ID'D BY CONNECTION
+    const nodeContractCodes = contractCodes[this.wsEndpoint] || []; // TODO LATER SHOULD BE ID'D BY CONNECTION
     return nodeContractCodes;
   }
 
   getContracts() {
     const contractsString = this.context.globalState.get<string>('contracts');
+    console.log('contractsString', contractsString);
     if (!contractsString) {
       return {};
     }
     return JSON.parse(contractsString);
   }
 
+  // don't quite think this is working
   async saveContract(contractName: string, contractAddress: string, abi: Abi) {
     const contracts = this.getConnectionContracts();
+    console.log('connectioncontracts was',contracts);
     const existingContract = contracts.find(
       contract => contract.name === contractName || contract.address === contractAddress
     );
@@ -139,12 +146,12 @@ export class Substrate {
         abi: abi,
       });
     }
+    console.log('gonna update');
     await this.updateConnectionContracts(contracts);
   }
 
   async updateConnectionContracts(codes: ContractInfo[]) {
-    const connectedNode = this.context.globalState.get<string>('connected-node'); // TODO figure out how I handle connected-node
-    // : is called by the connectiontreeview
+    const connectedNode = this.wsEndpoint;
     if (!connectedNode) {
       throw Error('Not connected to node');
     }
@@ -154,7 +161,8 @@ export class Substrate {
   }
 
   async updateContracts(codes: Contracts) {
+    console.log('updated contracts',codes);
     await this.context.globalState.update('contracts', JSON.stringify(codes));
-    await vscode.commands.executeCommand('nodes.refresh');
+    await vscode.commands.executeCommand('substrate.refreshContracts');
   }
 }

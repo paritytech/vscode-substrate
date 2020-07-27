@@ -30,8 +30,8 @@ export class ContractsProvider extends TreeDataProvider<ContractTreeItem> {
 
   getChildren(element?: ContractTreeItem): Thenable<ContractTreeItem[]> {
     if (element === undefined) {
-      return Promise.resolve([]);
-      // return Promise.resolve(this.substrate.getConnectionContracts().map(a => new ContractTreeItem(a)));
+      console.log('connection contractss', this.substrate.getConnectionContracts());
+      return Promise.resolve(this.substrate.getConnectionContracts().map(a => new ContractTreeItem(a)));
     }
     return Promise.resolve(element.children);
   }
@@ -43,7 +43,7 @@ export class ContractTreeItem extends vscode.TreeItem {
 
   constructor(contract: Contract) {
     super(
-      contract.meta.name,
+      contract.name,
       vscode.TreeItemCollapsibleState.None);
     this.description = contract.address;
     this.contract = contract;
@@ -72,6 +72,37 @@ export async function setupContractsTreeView(substrate: Substrate, selectedProce
       treeView.message = `Connected to: ${wsEndpointFromCommand(process.command)} (${tryShortname(process.nodePath) + ' • ' + process.command})`;
     else
       treeView.message = `Not connected to any node.`;
+    vscode.commands.executeCommand('substrate.refreshContracts');
+  });
+
+  vscode.commands.registerCommand("substrate.refreshContracts", async (contractItem: ContractTreeItem) => {
+    treeDataProvider.refresh();
+  });
+
+  vscode.commands.registerCommand("substrate.forgetContract", async (contractItem: ContractTreeItem) => {
+    try {
+      const contracts = substrate.getConnectionContracts();
+      for (let i = 0; i < contracts.length; i++) {
+        const contract = contracts[i];
+        if (contract.name === contractItem.label || contract.address === contractItem.description) {
+          contracts.splice(i, 1);
+        }
+      }
+      await substrate.updateConnectionContracts(contracts);
+    } catch (err) {
+      vscode.window.showErrorMessage('You are not connected to a node');
+    }
+    await vscode.commands.executeCommand('substrate.refreshContracts');
+    vscode.window.showInformationMessage(`Successfully removed contract "${contractItem.label}"`);
+  });
+
+  vscode.commands.registerCommand("substrate.copyContractHash", async (contractItem: ContractTreeItem) => {
+    try {
+      await clipboard.write((contractItem as any).description);
+      vscode.window.showInformationMessage('Hash copied to clipboard');
+    } catch (err) {
+      vscode.window.showErrorMessage(`Failed to copy hash to clipboard: ${err.message}`);
+    }
   });
 
   vscode.commands.registerCommand("substrate.compileAndDeploy", async () => {
@@ -286,7 +317,7 @@ try{
                   if (res.indexOf('Failed') !== -1) {
                     error += res;
                   }
-                  if (res.indexOf('indices.NewAccountIndex') !== -1) {
+                  if (res.indexOf('contracts.Instantiated') !== -1) {
                     resultHash = res.substring(
                       res.lastIndexOf('["') + 2,
                       res.lastIndexOf('",'),
@@ -300,16 +331,14 @@ try{
                   return;
                 }
                 if (resultHash === '') {
-                  vscode.window.showInformationMessage(`Completed on block "${finalized}" but failed to get event result`);
+                  vscode.window.showWarningMessage(`Completed on block "${finalized}" but failed to get event result`);
                   return;
                 }
+                console.log('saving contract');
                 substrate.saveContract(name, resultHash, abi).catch(err => {
                   logError(`Failed to store contract: ${err.message}`);
                 });
                 vscode.window.showInformationMessage(`Completed on block ${finalized} with code hash ${resultHash}`);
-
-                // NEXT UP
-                // {"ApplyExtrinsic":2} : system.ExtrinsicFailed [{"Other":null},{"weight":100000,"class":"Normal","paysFee":"Yes"}]
               }
             });
           } catch (err) {
