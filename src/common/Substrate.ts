@@ -7,9 +7,9 @@ import { Abi } from '@polkadot/api-contract';
 
 const fs = require('fs');
 
-export type Contracts = { [index: string]: ContractInfo[] };
+export type Contracts = { [index: string]: Contract[] };
 
-export type ContractInfo = { name: string, address: string, abi: Abi };
+export type Contract = { name: string, address: string, abi: Abi };
 
 export class Substrate {
   private keyring = new Keyring({ type: 'sr25519' });
@@ -128,7 +128,6 @@ export class Substrate {
     return JSON.parse(contractsString);
   }
 
-  // don't quite think this is working
   async saveContract(contractName: string, contractAddress: string, abi: Abi) {
     const contracts = this.getConnectionContracts();
     console.log('connectioncontracts was',contracts);
@@ -150,7 +149,7 @@ export class Substrate {
     await this.updateConnectionContracts(contracts);
   }
 
-  async updateConnectionContracts(codes: ContractInfo[]) {
+  async updateConnectionContracts(codes: Contract[]) {
     const connectedNode = this.wsEndpoint;
     if (!connectedNode) {
       throw Error('Not connected to node');

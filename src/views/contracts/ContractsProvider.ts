@@ -12,13 +12,11 @@ import { compactAddLength } from '@polkadot/util';
 
 import * as clipboard from 'clipboardy';
 import { TreeDataProvider } from '../../common/TreeDataProvider';
-import { Substrate } from '../../common/Substrate';
+import { Substrate, Contract } from '../../common/Substrate';
 import { Process } from '../../processes/Processes';
 
 const fs = require('fs');
 const path = require('path');
-
-type Contract = any;
 
 export class ContractsProvider extends TreeDataProvider<ContractTreeItem> {
   substrate: Substrate;
@@ -77,6 +75,152 @@ export async function setupContractsTreeView(substrate: Substrate, selectedProce
 
   vscode.commands.registerCommand("substrate.refreshContracts", async (contractItem: ContractTreeItem) => {
     treeDataProvider.refresh();
+  });
+
+  vscode.commands.registerCommand("substrate.callContractMethod", async (contractItem: ContractTreeItem) => {
+
+    const abi = contractItem.contract.abi;
+
+    const methods = abi.abi.contract.messages;
+    const items = methods.map(method => {
+      const args = method.args.map((arg) => `${arg.name}: ${arg.type}`);
+      const retDisplayName = method.returnType && method.returnType.displayName;
+      return {
+        label: `🧭 ${method.name}(${args.join(', ')})${retDisplayName ? `: ${retDisplayName}` : ''}`,
+        description: method.mutates ? 'will mutate storage' : 'won\'t mutate storage',
+        detail: `Method selector: ${method.selector}`,
+        method
+      };
+    });
+    const pickedMessage = await vscode.window.showQuickPick(items, { placeHolder: 'ex. get(): bool' });
+    if (!pickedMessage) return;
+    const method = pickedMessage.method;
+
+    // todo DRY (& number, & value)
+    const valueTo: string | undefined = await showInputBoxValidate({
+      ignoreFocusOut: true,
+      prompt: 'The allotted value for this contract, i.e. the amount transferred to the contract as part of this call',
+      value: '1000000000000000',
+      placeHolder: 'ex. 1000000000000000'
+    }, async (value: any) => {
+      if (!value || !value.trim()) {
+        return 'Value is required';
+      }
+      if (!value.match(/^-{0,1}\d+$/)) {
+        return 'The value specified is not a number';
+      }
+      return '';
+    });
+    if (!valueTo) return;
+
+    const maxGas: string | undefined = await showInputBoxValidate({
+      ignoreFocusOut: true,
+      prompt: 'The maximum amount of gas that can be used by this call',
+      value: '1000000000000', // too much?
+      placeHolder: 'ex. 1000000000000'
+    }, async (value: any) => {
+      if (!value || !value.trim()) {
+        return 'A value is required';
+      }
+      if (!value.match(/^-{0,1}\d+$/)) {
+        return 'The maximum gas specified is not a number';
+      }
+      return '';
+    });
+    if (!maxGas) return;
+
+    const argsVals = [];
+    const argsDefs = pickedMessage.method.args;
+
+    while (argsDefs.length > argsVals.length) {
+      const i: number = argsVals.length;
+      const prompt = `${argsDefs[i].name}: ${argsDefs[i].type.displayName}`;
+
+      argsVals.push(await showInputBoxValidate({
+        ignoreFocusOut: true,
+        prompt
+      }, async (value: any) => {
+        return ''
+      })); // todo cancellation management
+    }
+
+    // TODO DRY; both of the following are copies
+    const accounts = substrate.getAccounts();
+    const _account = await vscode.window.showQuickPick(substrate.getAccounts().map((x: any) => x.meta.name));
+    if (!_account) return;
+    const accountJson = accounts.find(a => a.meta.name === _account)!;
+
+    const keyring = substrate.getKeyring();
+    const account = keyring.addFromJson(accountJson);
+
+    const password: string | undefined = await showInputBoxValidate({
+      ignoreFocusOut: true,
+      prompt: 'Account password',
+      placeHolder: 'ex. StrongPassword',
+      password: true,
+      value: '',
+    }, async (value: any) => {
+      try {
+        account.decodePkcs8(value);
+        if (account.isLocked) {
+          return 'Failed to decode account';
+        }
+      } catch (e) {
+        return 'Failed to decode account';
+      }
+      return '';
+    });
+    if (typeof password === 'undefined') return;
+
+    // METHOD CALL BAM
+
+    try {
+      const api = substrate.getConnection();
+      if (!api) {
+        log('Not connected to a node', 'error', true);
+        return;
+      }
+      const { nonce } = await api.query.system.account(account.address);
+      const contractApi = api.tx.contracts ? api.tx['contracts'] : api.tx['contract'];
+      console.log('abi.messages is',abi.messages);
+      console.log('method.name is',method.name);
+      // TODO TODO NEXT UP IS WHY ABI.MESSAGES IE EMPTY
+
+      const methodExec = abi.messages[method.name];
+      const unsignedTransaction = contractApi.call(
+        contractItem.description,
+        valueTo,
+        maxGas,
+        methodExec(...argsVals),
+      );
+
+      const cb = await unsignedTransaction.sign(account, { nonce: nonce as any }).send(({ events = [], status }: any) => {
+        if (status.isFinalized) {
+          const finalized = status.asFinalized.toHex();
+          log(`Completed at block hash: ${finalized}`, 'info', false);
+
+          log(`Events:`, 'info', false);
+          let error: string = '';
+          events.forEach(({ phase, event: { data, method, section } }: any) => {
+            const res = `\t ${phase.toString()} : ${section}.${method} ${data.toString()}`;
+            if (res.indexOf('Failed') !== -1) {
+              error += res;
+            }
+            log(res, 'info', false);
+          });
+          if (error !== '') {
+            // Todo: Get error
+            log(`Failed on block "${finalized}" with error: ${error}`, 'error', true);
+            return;
+          }
+          vscode.window.showInformationMessage(`Completed on block ${finalized}`);
+        }
+      });
+      // Get results from contract
+    } catch (err) {
+      log(`Error on put code: ${err.message}`, 'error', true);
+    }
+
   });
 
   vscode.commands.registerCommand("substrate.forgetContract", async (contractItem: ContractTreeItem) => {
