@@ -3,13 +3,11 @@ import { Keyring } from '@polkadot/keyring';
 import { KeyringPair$Json } from '@polkadot/keyring/types';
 import { KeypairType } from '@polkadot/util-crypto/types';
 import { ApiPromise, WsProvider } from '@polkadot/api';
-import { Abi } from '@polkadot/api-contract';
-
 const fs = require('fs');
 
 export type Contracts = { [index: string]: Contract[] };
 
-export type Contract = { name: string, address: string, abi: Abi };
+export type Contract = { name: string, address: string, abiJson: any };
 
 export class Substrate {
   private keyring = new Keyring({ type: 'sr25519' });
@@ -121,31 +119,28 @@ export class Substrate {
 
   getContracts() {
     const contractsString = this.context.globalState.get<string>('contracts');
-    console.log('contractsString', contractsString);
     if (!contractsString) {
       return {};
     }
     return JSON.parse(contractsString);
   }
 
-  async saveContract(contractName: string, contractAddress: string, abi: Abi) {
+  async saveContract(contractName: string, contractAddress: string, abiJson: any) {
     const contracts = this.getConnectionContracts();
-    console.log('connectioncontracts was',contracts);
     const existingContract = contracts.find(
       contract => contract.name === contractName || contract.address === contractAddress
     );
     if (existingContract) {
       existingContract.name = contractName;
       existingContract.address = contractAddress;
-      existingContract.abi = abi;
+      existingContract.abiJson = abiJson;
     } else {
       contracts.push({
         name: contractName,
         address: contractAddress,
-        abi: abi,
+        abiJson: abiJson,
       });
     }
-    console.log('gonna update');
     await this.updateConnectionContracts(contracts);
   }
 
@@ -160,7 +155,6 @@ export class Substrate {
   }
 
   async updateContracts(codes: Contracts) {
-    console.log('updated contracts',codes);
     await this.context.globalState.update('contracts', JSON.stringify(codes));
     await vscode.commands.executeCommand('substrate.refreshContracts');
   }

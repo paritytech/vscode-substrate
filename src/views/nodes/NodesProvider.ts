@@ -157,7 +157,7 @@ export function setUpNodesTreeView(nodes: Nodes, processes: any) {
         }
         return of(selectedNode);
       }),
-      tap(r => console.log('Selected node \'changes\' fired with', r))
+      // tap(r => console.log('Selected node \'changes\' fired with', r))
     ).subscribe(selectedNode$);
 
     const treeDataProvider = new NodesProvider(nodes, selectedNode$);

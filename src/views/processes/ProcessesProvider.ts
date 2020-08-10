@@ -93,7 +93,6 @@ export function setupProcessesTreeView(substrate: Substrate, processes: Processe
 
     const selectedProcess$ = new BehaviorSubject<Process | null>(null);
     vscode.commands.registerCommand("substrate.selectProcess", async (processTreeItem: ProcessTreeItem) => {
-      console.log('selectedprocess');
       selectedProcess$.next((processTreeItem as any).process || null);
       processTreeItem.process.term.show();
     });
