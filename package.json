@@ -178,11 +178,11 @@
 			},
 			{
 				"command": "substrate.createAccount",
-				"title": "Create account"
+				"title": "Generate new account"
 			},
 			{
 				"command": "substrate.importAccount",
-				"title": "Import account"
+				"title": "Import account from JSON"
 			},
 			{
 				"command": "substrate.removeAccount",
