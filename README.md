@@ -1,32 +1,8 @@
 # Substrate - VSCode extension
 
-Features
-* Provides a quick access to the VSCode Actions provided in the workspace
-* Detects the nodes in the workspace and lets you run them, or purge the chain
-* Detects the runtimes in the workspace and lets you see which pallets they use, gives you access to their documentation, and lets you install additional pallets easily from the Substrate Marketplace
-* Lists running processes, lets you kill them or access their terminal
-* Account management (for testing purposes)
-* Compile, deploy and call smart contracts
+Manage your node, runtime, browse and install pallets, manage your accounts and your smart contracts within VSCode.
 
-Walkthrough tasks (separate file)
-1. Workspace actions
-  1.1 Run workspace actions
-2. Node actions
-  2.1 Purge a node's chain
-  2.2 Run a node
-  2.3 Kill a node
-3. Runtime actions
-  3.1 Get information on installed pallets
-  3.2 Add a new pallet
-4. Account management
-  4.1 Import an account
-  4.2 Import an account from JSON
-  4.3 Generate a new account
-  4.4 Rename, copy address, export, remove account
-5. Contracts
-  5.1 Compile & deploy a contract (first select a node)
-  5.2 Call a contract method (contracts are persisted via connection info)
-  5.3 Copy hash, forget contract
+A complete list of features and walkthrough is available in [this document](./docs/features.md).
 
 Visit the extension's page on Visual Studio Marketplace: https://marketplace.visualstudio.com/items?itemName=paritytech.vscode-substrate
 
