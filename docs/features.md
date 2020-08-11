@@ -28,23 +28,28 @@ Access the extension's features by clicking the "Substrate" icon to the left.
 ## 1. Workspace actions
   ### 1.1 Run workspace actions
   The extension will detect all VSCode actions provided in your workspace folders and list them under the "Actions" panel. Hover over an action and click the "Execute" icon to the right to run it.
+
   ![Screenshot](./1-1.png)
 
 ## 2. Node actions
   ### 2.1 Compile & run a node
   The extension will detect all nodes (binary Rust projects) in the workspace and list them in the "Nodes" panel. To compile and run a node, hover over the node in the list and click the corresponding icon. The new process will be listed under "Processes" and a new terminal will be opened with the process's ouput.
+
   ![Screenshot](./2-1.png)
 
   ### 2.2 Run an already compiled node
   If you have already compiled the node and which to run it again without compiling the new changes, click the "Start node" button. The new process will be listed under "Processes" and a new terminal will be opened with the process's ouput.
+
   ![Screenshot](./2-2.png)
 
   ### 2.3 Kill a process
   Once a node is running, you can exit it by clicking the "Stop process" icon.
+
   ![Screenshot](./2-3.png)
 
   ### 2.4 Purge a node's chain
   You can purge the chain of an already compiled node by clicking the "Purge chain" icon.
+
   ![Screenshot](./2-4.png)
 
 ## 3. Runtime actions
@@ -52,12 +57,14 @@ Access the extension's features by clicking the "Substrate" icon to the left.
 
   ### 3.1 Get information on installed pallets
   First, select a node.
+
   ![Screenshot](./3-1.png)
 
   The runtime used by this node will be automatically detected and displayed in the "Marketplace" panel. The "Marketplace" panel will then list all pallets available, and add a checkmark next to those that are used by the runtime of the selected node. Hover over each pallet to get access to their homepage, documentation page and GitHub page.
 
   ### 3.2 Add a new pallet
   To add a pallet as a dependency of the runtime, click the "Add pallet" icon. This will install the pallet using the tool `substrate-deps`, installing it if necessary.
+
   ![Screenshot](./3-1.png)
 
 ## 4. Account management
@@ -65,18 +72,22 @@ Access the extension's features by clicking the "Substrate" icon to the left.
 
   ### 4.1 Import an account
   To add an account, hover over the "Accounts" bar and click the "+" icon. You will then be asked for a human-friendly name, cryptographic type and the key to the account.
+
   ![Screenshot](./4-1.png)
 
   ### 4.2 Import an account from JSON
   You can also import an account from a JSON file by clicking on the "Next actions" icon next to the "+" icon, then choosing "Import account from JSON."
+
   ![Screenshot](./4-2.png)
 
   ### 4.3 Generate a new account
   You can also generate a new account with a random seed by clicking "Generate new account".
+
   ![Screenshot](./4-3.png)
 
   ### 4.4 Rename, copy address, export, remove account
   By right-clicking an account, you can rename it, copy its address, export it as a JSON file, or remove the account from the list.
+
   ![Screenshot](./4-4.png)
 
 ## 5. Contracts
@@ -84,14 +95,19 @@ Access the extension's features by clicking the "Substrate" icon to the left.
 
   ### 5.1 Compile & deploy a contract
   Select a running process. This will list the contracts you already added to this endpoint in the extension (if any).
+
   ![Screenshot](./5-1-0.png)
+
   You can compile an __ink!__ project, upload its WASM code and instantiate the contract with one click by clicking the "..." icon after hovering over "Contracts", and then selecting "Compile & deploy contract". You will then be asked for the location of your __ink!__ project, a human-friendly name for the contract, the account (see section 4) with which to upload the WASM & deploy the contract, its password, the constructor to use when instantiating the contract, if necessary its arguments, the endowment and maximum amount of gas for the deployment. The contract will then be listed in the "Contracts" panel.
+
   ![Screenshot](./5-1-1.png)
 
   ### 5.2 Call a contract method
   Right-click a contract and click "Call contract method". You will then be asked various information and be informed of the progress of the transaction.
+
   ![Screenshot](./5-2.png)
 
   ### 5.3 Copy hash, forget contract
   By right-clicking a contract, you can also copy its hash or remove the contract from the list.
+
   ![Screenshot](./5-3.png)
