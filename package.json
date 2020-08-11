@@ -2,7 +2,7 @@
 	"name": "vscode-substrate",
 	"displayName": "VSCode Substrate",
 	"description": "Manage your Substrate node and add pallets from the Marketplace to your runtime",
-	"version": "0.4.10",
+	"version": "0.4.11",
 	"publisher": "paritytech",
 	"icon": "resources/icon.png",
 	"repository": {
@@ -134,6 +134,14 @@
 				"icon": {
 					"dark": "resources/startNode.svg",
 					"light": "resources/startNode-black.svg"
+				}
+			},
+			{
+				"command": "substrate.compileStartNode",
+				"title": "Substrate: Compile & start node",
+				"icon": {
+					"dark": "resources/compileStartNode.svg",
+					"light": "resources/compileStartNode-black.svg"
 				}
 			},
 			{
@@ -285,6 +293,11 @@
 					"command": "substrate.startNode",
 					"when": "view == substrateNodes",
 					"group": "inline@1"
+				},
+				{
+					"command": "substrate.compileStartNode",
+					"when": "view == substrateNodes",
+					"group": "inline@2"
 				},
 				{
 					"command": "substrateMarketplace.palletHomepage",
