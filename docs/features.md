@@ -53,7 +53,6 @@ Access the extension's features by clicking the "Substrate" icon to the left.
   ![Screenshot](./2-4.png)
 
 ## 3. Runtime actions
-  The extension distinguishes between nodes (binary Rust projects) and runtimes (used by the nodes)
 
   ### 3.1 Get information on installed pallets
   First, select a node.
