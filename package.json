@@ -36,6 +36,10 @@
 				"contents": "No actions were found in this workspace."
 			},
 			{
+				"view": "substrateAccounts",
+				"contents": "No accounts found."
+			},
+			{
 				"view": "substrateProcesses",
 				"contents": "No node is currently running."
 			},
@@ -74,6 +78,16 @@
 					"id": "substrateMarketplace",
 					"name": "Marketplace",
 					"group": "@3"
+				},
+				{
+					"id": "substrateAccounts",
+					"name": "Accounts",
+					"group": "@4"
+				},
+				{
+					"id": "substrateContracts",
+					"name": "Contracts",
+					"group": "@5"
 				}
 			]
 		},
@@ -161,6 +175,58 @@
 					"dark": "resources/add.svg",
 					"light": "resources/add-black.svg"
 				}
+			},
+			{
+				"command": "substrate.addAccount",
+				"title": "Substrate: Add account",
+				"icon": {
+					"dark": "resources/add.svg",
+					"light": "resources/add-black.svg"
+				}
+			},
+			{
+				"command": "substrate.createAccount",
+				"title": "Generate new account"
+			},
+			{
+				"command": "substrate.importAccount",
+				"title": "Import account from JSON"
+			},
+			{
+				"command": "substrate.removeAccount",
+				"title": "Remove"
+			},
+			{
+				"command": "substrate.exportAccount",
+				"title": "Export"
+			},
+			{
+				"command": "substrate.renameAccount",
+				"title": "Change name"
+			},
+			{
+				"command": "substrate.copyAddress",
+				"title": "Copy address"
+			},
+			{
+				"command": "substrate.compileAndDeploy",
+				"title": "Compile & deploy contract"
+			},
+			{
+				"command": "substrate.forgetContract",
+				"title": "Forget contract"
+			},
+			{
+				"command": "substrate.copyContractHash",
+				"title": "Copy hash"
+			},
+			{
+				"command": "substrate.callContractMethod",
+				"title": "Call a contract method"
+			},
+			{
+				"command": "substrate.refreshContracts",
+				"title": "Refresh contracts list"
 			}
 		],
 		"menus": {
@@ -180,6 +246,26 @@
 				{
 					"command": "substrateMarketplace.installPallet",
 					"when": "false"
+				}
+			],
+			"view/title": [
+				{
+					"command": "substrate.addAccount",
+					"when": "view == substrateAccounts",
+					"group": "navigation"
+				},
+				{
+					"command": "substrate.createAccount",
+					"when": "view == substrateAccounts"
+				},
+				{
+					"command": "substrate.importAccount",
+					"when": "view == substrateAccounts"
+				},
+				{
+					"command": "substrate.compileAndDeploy",
+					"when": "view == substrateContracts",
+					"group": "section-1"
 				}
 			],
 			"view/item/context": [
@@ -232,6 +318,37 @@
 					"command": "substrateMarketplace.installPallet",
 					"when": "view == substrateMarketplace && viewItem == pallet",
 					"group": "inline@3"
+				},
+				{
+					"command": "substrate.removeAccount",
+					"when": "view == substrateAccounts"
+				},
+				{
+					"command": "substrate.exportAccount",
+					"when": "view == substrateAccounts"
+				},
+				{
+					"command": "substrate.renameAccount",
+					"when": "view == substrateAccounts"
+				},
+				{
+					"command": "substrate.copyAddress",
+					"when": "view == substrateAccounts"
+				},
+				{
+					"command": "substrate.callContractMethod",
+					"when": "view == substrateContracts",
+					"group": "section-1"
+				},
+				{
+					"command": "substrate.copyContractHash",
+					"when": "view == substrateContracts",
+					"group": "section-1"
+				},
+				{
+					"command": "substrate.forgetContract",
+					"when": "view == substrateContracts",
+					"group": "section-2"
 				}
 			]
 		}
@@ -248,9 +365,12 @@
 		"typescript": "^3.5.1"
 	},
 	"dependencies": {
+		"@polkadot/api": "^1.27.1",
+		"@polkadot/api-contract": "^1.27.1",
 		"@types/lodash": "^4.14.149",
 		"@types/node-fetch": "^2.5.5",
 		"array-flat-polyfill": "^1.0.1",
+		"clipboardy": "^2.3.0",
 		"glob": "^7.1.6",
 		"lodash": "^4.17.15",
 		"node-fetch": "^2.6.0",

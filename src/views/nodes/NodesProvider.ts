@@ -105,7 +105,10 @@ async function quickPickNodePath(nodes: Nodes) {
 
 function getCargoName(directory: string) {
   const toml = fs.readFileSync(path.join(directory,'Cargo.toml')).toString();
-  return toml.match(/name ?= ?'(.+)'/)[1];
+  const ap = toml.match(/name ?= ?'(.+)'/);
+  if (ap)
+    return ap[1];
+  else return toml.match(/name ?= ?"(.+)"/)[1];
 }
 
 function getWorkspaceRoot(directory: string) {
@@ -121,6 +124,7 @@ function getWorkspaceRoot(directory: string) {
 export function setUpNodesTreeView(nodes: Nodes, processes: any) {
 
     vscode.commands.registerCommand("substrate.startNode", async (nodePathLike?: string | NodeTreeItem, _flags?: string | string[], options: any = {compile: false}) => {
+      try {
       let nodePath = nodePathLike instanceof NodeTreeItem ? nodePathLike.nodePath : nodePathLike;
       if (nodePath) {
         selectedNodePath$.next(nodePath); // select the item we launch the command on
@@ -146,6 +150,10 @@ export function setUpNodesTreeView(nodes: Nodes, processes: any) {
       term.show();
 
       processes.new({nodePath: defNodePath, command: flags, term: term});
+    } catch (e) {
+      vscode.window.showErrorMessage(e);
+      console.error(e);
+    }
     });
 
     vscode.commands.registerCommand("substrate.compileStartNode", async (nodePathLike?: string | NodeTreeItem, _flags?: string | string[]) => {
@@ -178,7 +186,7 @@ export function setUpNodesTreeView(nodes: Nodes, processes: any) {
         }
         return of(selectedNode);
       }),
-      tap(r => console.log('Selected node \'changes\' fired with', r))
+      // tap(r => console.log('Selected node \'changes\' fired with', r))
     ).subscribe(selectedNode$);
 
     const treeDataProvider = new NodesProvider(nodes, selectedNode$);

@@ -1,12 +1,14 @@
 # Substrate - VSCode extension
 
-Browse and install pallets from the Substrate Marketplace and manage your node.
+Manage your node, runtime, browse and install pallets, manage your accounts and your smart contracts within VSCode.
+
+A complete list of features and walkthrough is available in [this document](./docs/features.md).
 
 Visit the extension's page on Visual Studio Marketplace: https://marketplace.visualstudio.com/items?itemName=paritytech.vscode-substrate
 
 ![Screenshot](./screenshot.png)
 
-This extension is work in progress and is in active development. Please [report](https://github.com/paritytech/vscode-substrate/issues/new) any issues you encounter. The context and roadmap can be found [here](https://github.com/paritytech/substrate-playground/issues/28).
+This extension is work in progress and is in active development. Please [report](https://github.com/paritytech/vscode-substrate/issues/new) any issues you encounter.
 
 ## Installation
 
