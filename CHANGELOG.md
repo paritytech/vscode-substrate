@@ -1,5 +1,8 @@
 # Changelog
 
+## v0.5.0
+* Smart contracts and accounts support
+
 ## v0.4.11
 * "Purge chain" will run the binary directly (instead of potentially recompiling); same for "Start node".
 * Add command "Compile & start node" that behaves like "Start node" previously, i.e. using "cargo run".
