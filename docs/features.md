@@ -64,7 +64,7 @@ Access the extension's features by clicking the "Substrate" icon to the left.
   ### 3.2 Add a new pallet
   To add a pallet as a dependency of the runtime, click the "Add pallet" icon. This will install the pallet using the tool `substrate-deps`, installing it if necessary.
 
-  ![Screenshot](./3-1.png)
+  ![Screenshot](./3-2.png)
 
 ## 4. Account management
   Please note that this extension's account management features are meant to be used for testing/development purposes only. The accounts are persisted across restarts.
