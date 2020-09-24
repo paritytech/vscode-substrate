@@ -5,7 +5,6 @@ import { setUpNodesTreeView } from './views/nodes/NodesProvider';
 import Nodes from './nodes/Nodes';
 import Processes from './processes/Processes';
 import { setupProcessesTreeView } from './views/processes/ProcessesProvider';
-import { setupTasksTreeView } from './views/tasks/TasksProvider';
 import { setupAccountsTreeView } from './views/accounts/AccountsProvider';
 import { Substrate } from './common/Substrate';
 import { setupContractsTreeView } from './views/contracts/ContractsProvider';
@@ -30,9 +29,6 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	// Set up contracts
 	setupContractsTreeView(substrate, selectedProcess$, context);
-
-	// Set up tasks
-	const tasks = await setupTasksTreeView();
 }
 
 export function deactivate() { }

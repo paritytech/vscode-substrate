@@ -32,10 +32,6 @@
 	"contributes": {
 		"viewsWelcome": [
 			{
-				"view": "substrateTasks",
-				"contents": "No actions were found in this workspace."
-			},
-			{
 				"view": "substrateAccounts",
 				"contents": "No accounts found."
 			},
@@ -59,11 +55,6 @@
 		},
 		"views": {
 			"substrate": [
-				{
-					"id": "substrateTasks",
-					"name": "Actions",
-					"group": "@0"
-				},
 				{
 					"id": "substrateProcesses",
 					"name": "Processes",
@@ -92,14 +83,6 @@
 			]
 		},
 		"commands": [
-			{
-				"command": "substrate.runTask",
-				"title": "Substrate: Execute action",
-				"icon": {
-					"dark": "resources/runTask.svg",
-					"light": "resources/runTask-black.svg"
-				}
-			},
 			{
 				"command": "substrate.stopProcess",
 				"title": "Substrate: Stop process",
@@ -265,11 +248,6 @@
 				}
 			],
 			"view/item/context": [
-				{
-					"command": "substrate.runTask",
-					"when": "view == substrateTasks",
-					"group": "inline@0"
-				},
 				{
 					"command": "substrate.polkadotApps",
 					"when": "view == substrateProcesses && viewItem == theia",
