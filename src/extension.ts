@@ -6,7 +6,6 @@ import Nodes from './nodes/Nodes';
 import Processes from './processes/Processes';
 import { setupProcessesTreeView } from './views/processes/ProcessesProvider';
 import { setupTasksTreeView } from './views/tasks/TasksProvider';
-import { showGettingStarted } from './gettingstarted';
 import { setupAccountsTreeView } from './views/accounts/AccountsProvider';
 import { Substrate } from './common/Substrate';
 import { setupContractsTreeView } from './views/contracts/ContractsProvider';
@@ -34,16 +33,6 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	// Set up tasks
 	const tasks = await setupTasksTreeView();
-
-	const isTheia = process.env.SUBSTRATE_PLAYGROUND !== undefined;
-
-	if (isTheia && !vscode.window.activeTextEditor) {
-		showGettingStarted(context, tasks);
-	}
-
-	vscode.commands.registerCommand("substrate.gettingStarted", () => {
-		showGettingStarted(context, tasks);
-	});
 }
 
 export function deactivate() { }
