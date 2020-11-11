@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.5.1
+* Remove Getting Started (Substrate Playground)
+* Remove Tasks
+* Remove built-in default process
+
 ## v0.5.0
 * Smart contracts and accounts support
 
