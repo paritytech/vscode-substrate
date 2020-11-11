@@ -82,7 +82,7 @@ export class NodeTreeItem extends vscode.TreeItem {
   }
 }
 
-
+// Prompt the user to select a node among a list
 async function quickPickNodePath(nodes: Nodes) {
   let nodePaths = nodes.nodes$.getValue().map((node: Node) => node.nodePath);
 
@@ -123,13 +123,16 @@ function getWorkspaceRoot(directory: string) {
 
 export function setUpNodesTreeView(nodes: Nodes, processes: any) {
 
+    // Can be called by the NodesProvider, in which case a NodeTreeItem is provided;
+    // or remotely (across iframe in Substrate Playground), in which case we provide
+    // the path of the node to run, and optional additional flags.
     vscode.commands.registerCommand("substrate.startNode", async (nodePathLike?: string | NodeTreeItem, _flags?: string | string[], options: any = {compile: false}) => {
       try {
       let nodePath = nodePathLike instanceof NodeTreeItem ? nodePathLike.nodePath : nodePathLike;
       if (nodePath) {
         selectedNodePath$.next(nodePath); // select the item we launch the command on
       }
-      const defNodePath = nodePath || await quickPickNodePath(nodes);
+      const defNodePath = nodePath || await quickPickNodePath(nodes); // e.g. When run through Command Palette
       const term = vscode.window.createTerminal({ name: 'Start node ' + tryShortname(defNodePath), cwd: defNodePath });
 
       const flags = _flags ? (Array.isArray(_flags) ? _flags.join(' ') : _flags) : await vscode.window.showInputBox({
@@ -137,7 +140,7 @@ export function setUpNodesTreeView(nodes: Nodes, processes: any) {
         prompt: 'Flags to run Substrate with',
         ignoreFocusOut: true
       });
-      if (!flags) return; // user canceled
+      if (!flags) return; // user cancelled
 
       // todo use ws port to use polkadot apps
       // does it make sense to have two different polkadot apps endpoints ? two processes, one polkadot app endpoint ?

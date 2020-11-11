@@ -3,6 +3,7 @@ import * as vscode from 'vscode';
 
 export type Process = {nodePath: string; term: vscode.Terminal; command: string; termCloseHandlerDispose: any;}
 
+// Manages Substrate processes spawned through the extension
 export default class Processes {
 
   processes$: BehaviorSubject<Process[]> = new BehaviorSubject([] as Process[]);

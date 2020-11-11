@@ -9,6 +9,7 @@ export type Contracts = { [index: string]: Contract[] };
 
 export type Contract = { name: string, address: string, abiJson: any };
 
+// Manages API connection and extension storage (accounts, contracts)
 export class Substrate {
   private keyring = new Keyring({ type: 'sr25519' });
   private api?: ApiPromise;

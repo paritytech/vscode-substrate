@@ -26,6 +26,7 @@ const findNodesInWorkspace = () => {
 
 export type Node = {nodePath: string; runtimePath?: string; deps?: any[]}
 
+// Manages the auto-detection of nodes in the current workspace
 export default class Nodes {
 
   nodes$: BehaviorSubject<Node[]>;
