@@ -24,6 +24,7 @@ export class Substrate {
   ) { }
 
   async connectTo(wsEndpoint: string) {
+    this.disconnect();
     this.wsEndpoint = wsEndpoint;
     const api = new ApiPromise({provider: new WsProvider(wsEndpoint)});
     await api.isReady;
