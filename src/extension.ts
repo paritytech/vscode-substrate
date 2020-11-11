@@ -1,13 +1,13 @@
 import 'array-flat-polyfill';
 import * as vscode from 'vscode';
-import { setUpMarketplaceTreeView } from './views/marketplace/MarketplaceProvider';
-import { setUpNodesTreeView } from './views/nodes/NodesProvider';
+import { Substrate } from './common/Substrate';
 import Nodes from './nodes/Nodes';
 import Processes from './processes/Processes';
-import { setupProcessesTreeView } from './views/processes/ProcessesProvider';
 import { setupAccountsTreeView } from './views/accounts/AccountsProvider';
-import { Substrate } from './common/Substrate';
 import { setupContractsTreeView } from './views/contracts/ContractsProvider';
+import { setUpMarketplaceTreeView } from './views/marketplace/MarketplaceProvider';
+import { setUpNodesTreeView } from './views/nodes/NodesProvider';
+import { setupProcessesTreeView } from './views/processes/ProcessesProvider';
 
 export async function activate(context: vscode.ExtensionContext) {
 	const substrate = new Substrate(context)

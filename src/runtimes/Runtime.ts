@@ -6,6 +6,7 @@ import { vscToObservable } from '../util';
 const isEqual = require('lodash/fp/isEqual');
 const path = require('path');
 
+// Manages the auto-detection of a runtime's dependencies
 export default class Runtime {
 
   deps$: BehaviorSubject<string[]>;

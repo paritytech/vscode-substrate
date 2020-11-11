@@ -20,6 +20,7 @@ export function vscToObservable<T>(fn: (arg0: ((x: T) => any)) => any): Observab
   });
 }
 
+// Convert a full path to a human-friendly shorter path to display
 export function tryShortname(fullPath: string) {
   const fsPaths = vscode.workspace.workspaceFolders?.map((x) => x.uri.fsPath) || [];
   if (fsPaths.length !== 1) return fullPath;
