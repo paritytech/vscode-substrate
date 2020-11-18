@@ -20,6 +20,7 @@ export class Substrate {
   }
 
   constructor(
+    // Necessary to access the extension's persistent storage
     private context: vscode.ExtensionContext
   ) { }
 
@@ -51,6 +52,7 @@ export class Substrate {
     return this.keyring;
   }
 
+  // Verify if an account with the given name exists
   isAccountExists(name: string): boolean {
     const result = this.getAccounts();
     const exKey = result.find((val) => val.meta.name === name);
@@ -60,6 +62,7 @@ export class Substrate {
     return true;
   }
 
+  // Replace all accounts with new accounts list
   async updateAccounts(accounts: KeyringPair$Json[]) {
     await this.context.globalState.update('accounts', JSON.stringify(accounts));
   }
@@ -82,6 +85,7 @@ export class Substrate {
     await this.updateAccounts(accounts);
   }
 
+  // Forget an account
   async removeAccount(name: string) {
     const accounts = this.getAccounts();
     const index = accounts.findIndex((val) => val.meta['name'] === name);
@@ -100,6 +104,8 @@ export class Substrate {
     await this.updateAccounts(accounts);
   }
 
+  // Import a new keyring pair globally
+  // @TODO Keyring pairs are currently global, maybe scope them?
   async importKeyringPair(path: string) {
     const rawdata = fs.readFileSync(path);
     const pair: KeyringPair$Json = JSON.parse(rawdata.toString());
@@ -112,13 +118,17 @@ export class Substrate {
     await this.updateAccounts(accounts);
   }
 
+  // Get the list of contracts for the current endpoint
   getConnectionContracts() : any[] {
     if (!this.wsEndpoint) return [];
     const contractCodes = this.getContracts();
-    const nodeContractCodes = contractCodes[this.wsEndpoint] || []; // TODO LATER SHOULD BE ID'D BY CONNECTION
+    // @TODO Contracts are currently scoped to a websocket endpoint
+    // We could use better heuristics instead
+    const nodeContractCodes = contractCodes[this.wsEndpoint] || [];
     return nodeContractCodes;
   }
 
+  // Get the list of all contracts for all endpoints
   getContracts() {
     const contractsString = this.context.globalState.get<string>('contracts');
     if (!contractsString) {
@@ -127,6 +137,7 @@ export class Substrate {
     return JSON.parse(contractsString);
   }
 
+  // Add a new contract for the current endpoint
   async saveContract(contractName: string, contractAddress: string, abiJson: any) {
     const contracts = this.getConnectionContracts();
     const existingContract = contracts.find(
@@ -146,6 +157,7 @@ export class Substrate {
     await this.updateConnectionContracts(contracts);
   }
 
+  // Update contracts for the current endpoint
   async updateConnectionContracts(codes: Contract[]) {
     const connectedNode = this.wsEndpoint;
     if (!connectedNode) {
@@ -158,6 +170,6 @@ export class Substrate {
 
   async updateContracts(codes: Contracts) {
     await this.context.globalState.update('contracts', JSON.stringify(codes));
-    await vscode.commands.executeCommand('substrate.refreshContracts');
+    await vscode.commands.executeCommand('substrate.refreshContracts'); // Refresh TreeView
   }
 }

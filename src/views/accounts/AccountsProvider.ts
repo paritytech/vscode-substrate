@@ -1,15 +1,10 @@
-import * as vscode from 'vscode';
-import { BehaviorSubject, of, combineLatest } from 'rxjs';
-import { tryShortname, showInputBoxValidate } from '../../util';
-import { switchMap, tap } from 'rxjs/operators';
-import Nodes, {Node} from '../../nodes/Nodes';
-
-import { mnemonicGenerate, randomAsU8a } from '@polkadot/util-crypto';
 import { u8aToHex } from '@polkadot/util';
-
+import { mnemonicGenerate, randomAsU8a } from '@polkadot/util-crypto';
 import * as clipboard from 'clipboardy';
-import { TreeDataProvider } from '../../common/TreeDataProvider';
+import * as vscode from 'vscode';
 import { Substrate } from '../../common/Substrate';
+import { TreeDataProvider } from '../../common/TreeDataProvider';
+import { showInputBoxValidate } from '../../util';
 
 const fs = require('fs');
 
@@ -48,6 +43,7 @@ export async function setupAccountsTreeView(substrate: Substrate, context: vscod
     const treeDataProvider = new AccountsProvider(substrate);
     vscode.window.createTreeView('substrateAccounts', { treeDataProvider });
 
+    // Add an existing account
     vscode.commands.registerCommand("substrate.addAccount", async () => {
       const name: string | undefined = await showInputBoxValidate({
           ignoreFocusOut: true,
@@ -84,6 +80,7 @@ export async function setupAccountsTreeView(substrate: Substrate, context: vscod
       treeDataProvider.refresh();
     });
 
+  // Generate a new account
   vscode.commands.registerCommand("substrate.createAccount", async () => {
     const name: string | undefined = await showInputBoxValidate({
       ignoreFocusOut: true,
@@ -140,9 +137,11 @@ export async function setupAccountsTreeView(substrate: Substrate, context: vscod
     treeDataProvider.refresh();
   });
 
-
+  // Rename the selected account in the TreeView
   vscode.commands.registerCommand("substrate.renameAccount", async (item) => {
-    // TODO Quickpick si via command palette
+    // TODO This command and the following ones currently don't work when called
+    // from the command palette (no "item" argument provided): we could then ask
+    // the user to first quickpick which account to rename.
     const name: string | undefined = await showInputBoxValidate({
       ignoreFocusOut: true,
       prompt: 'Account name',
@@ -164,11 +163,13 @@ export async function setupAccountsTreeView(substrate: Substrate, context: vscod
     treeDataProvider.refresh();
   });
 
+  // Remove the selected account in the TreeView
   vscode.commands.registerCommand("substrate.removeAccount", async (item) => {
     await substrate.removeAccount(item.account.meta.name);
     treeDataProvider.refresh();
   });
 
+  // Copy the address of the selected account in the TreeView
   vscode.commands.registerCommand("substrate.copyAddress", async (item) => {
     try {
       await clipboard.write(item.account.address);
@@ -178,6 +179,7 @@ export async function setupAccountsTreeView(substrate: Substrate, context: vscod
     }
   });
 
+  // Import a new account
   vscode.commands.registerCommand("substrate.importAccount", async () => {
     const res = await vscode.window.showOpenDialog({
       openLabel: 'Import',
@@ -194,6 +196,7 @@ export async function setupAccountsTreeView(substrate: Substrate, context: vscod
     treeDataProvider.refresh();
   });
 
+  // Export the selected account in the TreeView
   vscode.commands.registerCommand("substrate.exportAccount", async (item) => {
     const result = await vscode.window.showSaveDialog({});
     if (!result) return;
