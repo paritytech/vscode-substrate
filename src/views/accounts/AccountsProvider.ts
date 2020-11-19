@@ -39,6 +39,15 @@ export class AccountTreeItem extends vscode.TreeItem {
   }
 }
 
+async function quickPickAccount(substrate: Substrate, placeholder: string) {
+  const quickPickItem = await vscode.window.showQuickPick(substrate.getAccounts().map(pair => ({
+    label: pair.address,
+    decription: pair.meta.name,
+    account: pair
+  }),{placeHolder: placeholder}));
+  return quickPickItem?.account;
+}
+
 export async function setupAccountsTreeView(substrate: Substrate, context: vscode.ExtensionContext) {
     const treeDataProvider = new AccountsProvider(substrate);
     vscode.window.createTreeView('substrateAccounts', { treeDataProvider });
@@ -138,41 +147,44 @@ export async function setupAccountsTreeView(substrate: Substrate, context: vscod
   });
 
   // Rename the selected account in the TreeView
-  vscode.commands.registerCommand("substrate.renameAccount", async (item) => {
-    // TODO This command and the following ones currently don't work when called
-    // from the command palette (no "item" argument provided): we could then ask
-    // the user to first quickpick which account to rename.
+  vscode.commands.registerCommand("substrate.renameAccount", async (item?: AccountTreeItem) => {
+    let itemAccount = item?.account || await quickPickAccount(substrate, 'Please pick the account you want to rename');
+    if (!itemAccount) return;
     const name: string | undefined = await showInputBoxValidate({
       ignoreFocusOut: true,
       prompt: 'Account name',
-      value: item.account.meta.name,
+      value: itemAccount.meta.name,
       placeHolder: 'ex. Alice'
     }, async (value: any) => {
       if (!value || !value.trim()) {
         return 'Name is required';
       }
-      if (substrate.isAccountExists(value) && value !== item.account.meta.name) {
+      if (substrate.isAccountExists(value) && value !== itemAccount.meta.name) {
         return 'Account with same name already exists';
       }
       return '';
     });
     if (!name) return;
 
-    await substrate.renameAccount(item.account.meta.name, name);
+    await substrate.renameAccount(itemAccount.meta.name, name);
 
     treeDataProvider.refresh();
   });
 
   // Remove the selected account in the TreeView
-  vscode.commands.registerCommand("substrate.removeAccount", async (item) => {
-    await substrate.removeAccount(item.account.meta.name);
+  vscode.commands.registerCommand("substrate.removeAccount", async (item?: AccountTreeItem) => {
+    let itemAccount = item?.account || await quickPickAccount(substrate, 'Please pick the account you want to remove');
+    if (!itemAccount) return;
+    await substrate.removeAccount(itemAccount.meta.name);
     treeDataProvider.refresh();
   });
 
   // Copy the address of the selected account in the TreeView
-  vscode.commands.registerCommand("substrate.copyAddress", async (item) => {
+  vscode.commands.registerCommand("substrate.copyAddress", async (item?: AccountTreeItem) => {
+    let itemAccount = item?.account || await quickPickAccount(substrate, 'Please pick the account whose address you want to copy');
+    if (!itemAccount) return;
     try {
-      await clipboard.write(item.account.address);
+      await clipboard.write(itemAccount.address);
       vscode.window.showInformationMessage(`Address copied to clipboard.`);
     } catch (err) {
       vscode.window.showErrorMessage(`Failed to copy address to clipboard: ${err.message}`);
@@ -197,10 +209,13 @@ export async function setupAccountsTreeView(substrate: Substrate, context: vscod
   });
 
   // Export the selected account in the TreeView
-  vscode.commands.registerCommand("substrate.exportAccount", async (item) => {
+  vscode.commands.registerCommand("substrate.exportAccount", async (item?: AccountTreeItem) => {
+    let itemAccount = item?.account || await quickPickAccount(substrate,'Please pick an account to export');
+    if (!itemAccount) return;
+
     const result = await vscode.window.showSaveDialog({});
     if (!result) return;
 
-    fs.writeFileSync(result.fsPath, JSON.stringify(item.account), 'utf8');
+    fs.writeFileSync(result.fsPath, JSON.stringify(itemAccount), 'utf8');
   });
 }
