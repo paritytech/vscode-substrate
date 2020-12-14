@@ -23,3 +23,7 @@ Alternatively, search for "VSCode Substrate" in the extension marketplace.
 ## Development
 
 Clone, run `yarn` to install the dependencies, open the folder in VSCode, run the command "Debug: Start Debugging" to launch a new VSCode instance with the extension running.
+
+## Publish
+
+Bump the version in `package.json`, tag your commit with the version number (`vX.X.X`) and push. This will trigger the GitHub Action and publish the new version on VSCode Marketplace as well as create a new release on GitHub. Release information can be edited manually and added to CHANGELOG.md
