@@ -21,9 +21,6 @@ jobs:
         run: |
           npm install
           npx vsce package -o vscode-substrate.vsix
-      - name: Push to VSCode store
-        run: |
-          npx vsce publish
       - name: Publish Extension to Visual Studio Marketplace
         run: npx vsce publish --pat ${{ secrets.MARKETPLACE_TOKEN }} --packagePath ./vscode-substrate.vsix
       - name: Create GitHub Release
